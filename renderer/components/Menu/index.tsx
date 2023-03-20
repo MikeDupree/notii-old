@@ -11,7 +11,9 @@ import Tooltip from '@mui/material/Tooltip';
 import PersonAdd from '@mui/icons-material/PersonAdd';
 import Settings from '@mui/icons-material/Settings';
 import Logout from '@mui/icons-material/Logout';
+// Next-auth
 import { useSession } from 'next-auth/react';
+import { signOut } from "next-auth/react"
 
 const AccountMenu = () => {
   const session = useSession();
@@ -96,7 +98,10 @@ const AccountMenu = () => {
         </ListItemIcon>
         Settings
       </MenuItem>
-      <MenuItem onClick={handleClose}>
+      <MenuItem onClick={() => {
+         signOut();
+         handleClose();
+        }}>
         <ListItemIcon>
           <Logout fontSize="small" />
         </ListItemIcon>
@@ -107,11 +112,17 @@ const AccountMenu = () => {
 }
 
 export default function Menu() {
+
+  const session = useSession();
+  if (!session.data) {
+    return null;
+  }
+
   return (
     <React.Fragment>
       <Box sx={{ display: 'flex', alignItems: 'center', textAlign: 'center' }}>
         <Typography sx={{ minWidth: 100 }}>Dashboard</Typography>
-        <Typography sx={{ minWidth: 100 }}>Profile</Typography>
+        <Typography sx={{ minWidth: 100 }}>Apps</Typography>
         <div style={{ flexGrow: 1 }} />
         <AccountMenu />
       </Box>
