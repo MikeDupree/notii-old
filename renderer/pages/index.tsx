@@ -5,8 +5,8 @@ import Container from '@mui/material/Container';
 import Typography from '@mui/material/Typography';
 import Box from '@mui/material/Box';
 import Menu from '../components/Menu';
-
 export default function Home({ test }) {
+
   return (
     <>
       <Head>
@@ -28,7 +28,7 @@ export default function Home({ test }) {
           <Typography variant="h4" component="h1" gutterBottom>
           </Typography>
           <Link href="/api/auth/signin/github" color="secondary">
-          test
+          Login
           </Link>
         </Box>
       </Container>
@@ -56,7 +56,7 @@ export default function Home({ test }) {
 
 export async function getServerSideProps(context) {
   
-  console.log('get serverside');
+  console.log('get serverside',context);
   return {
     props: {
       test: 'This is a test'
