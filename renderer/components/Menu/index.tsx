@@ -1,4 +1,4 @@
-import * as React from 'react';
+import React, { MouseEvent } from 'react';
 import Box from '@mui/material/Box';
 import Avatar from '@mui/material/Avatar';
 import MuiMenu from '@mui/material/Menu';
@@ -14,16 +14,38 @@ import Logout from '@mui/icons-material/Logout';
 // Next-auth
 import { useSession } from 'next-auth/react';
 import { signOut } from "next-auth/react"
+import { useRouter } from 'next/router';
+
+// TODO find the proper type, or create a type for session.
+const getRoute = (id: string, user: any) => {
+  switch (id) {
+    case 'account':
+      return `account/${user.sub}`;
+  }
+  
+  return id;
+}
 
 const AccountMenu = () => {
   const session = useSession();
+  const router = useRouter();
   console.log('session', session);
-  const handleClick = (event: React.MouseEvent<HTMLElement>) => {
+  console.log('router', router);
+
+  const handleClick = (event: MouseEvent<HTMLElement>) => {
     setAnchorEl(event.currentTarget);
   };
+
   const handleClose = () => {
     setAnchorEl(null);
   };
+
+  const handleLinkClick = (event: MouseEvent<HTMLElement>) => {
+    const element = event.target as HTMLElement;
+    router.push(getRoute(element.id, session.data.user));
+    handleClose();
+  }
+
   const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
   const open = Boolean(anchorEl);
 
@@ -79,29 +101,30 @@ const AccountMenu = () => {
       transformOrigin={{ horizontal: 'right', vertical: 'top' }}
       anchorOrigin={{ horizontal: 'right', vertical: 'bottom' }}
     >
-      <MenuItem onClick={handleClose}>
-        <Avatar /> Profile
+      <MenuItem>
+        <Avatar src={session.data.user.image} sx={{ width: 32, height: 32 }} />
+        Profile
       </MenuItem>
-      <MenuItem onClick={handleClose}>
+      <MenuItem id='account' onClick={handleLinkClick}>
         <Avatar /> My account
       </MenuItem>
       <Divider />
-      <MenuItem onClick={handleClose}>
+      <MenuItem id='add' onClick={handleLinkClick}>
         <ListItemIcon>
           <PersonAdd fontSize="small" />
         </ListItemIcon>
         Add another account
       </MenuItem>
-      <MenuItem onClick={handleClose}>
+      <MenuItem id='settings' onClick={handleLinkClick}>
         <ListItemIcon>
           <Settings fontSize="small" />
         </ListItemIcon>
         Settings
       </MenuItem>
       <MenuItem onClick={() => {
-         signOut();
-         handleClose();
-        }}>
+        signOut();
+        handleClose();
+      }}>
         <ListItemIcon>
           <Logout fontSize="small" />
         </ListItemIcon>

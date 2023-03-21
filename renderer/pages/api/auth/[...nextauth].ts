@@ -63,13 +63,14 @@ export default NextAuth({
   callbacks: {
     // async signIn({ user, account, profile, email, credentials }) { return true },
     // async redirect({ url, baseUrl }) { return baseUrl },
-    // async session({ session, token, user }) { return session },
+    async session({ session, token, user }) {
+      const sessionResponse = {
+        ...session,
+        user: { ...session.user, ...token }
+      }
+      return sessionResponse;
+    },
     async jwt({ token, user, account, profile, isNewUser }) {
-      console.log('==Auth==');
-      console.log('token', token);
-      console.log('user', user);
-      console.log('account', account);
-      console.log('profile', profile);
       return token;
     }
   },
