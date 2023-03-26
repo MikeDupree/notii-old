@@ -1,8 +1,5 @@
 import React from "react";
-import Link from "next/link";
-import Container from "@mui/material/Container";
-import Typography from "@mui/material/Typography";
-import Box from "@mui/material/Box";
+import { Box, Button, Container, TextField, Typography } from "@mui/material";
 
 export default function Home({ test }) {
   return (
@@ -18,8 +15,20 @@ export default function Home({ test }) {
           }}
         >
           <Typography variant="h4" component="h1" gutterBottom>
-            Notii
+            Tasks
           </Typography>
+        </Box>
+        <Box
+          sx={{
+            my: 4,
+            display: "flex",
+            flexDirection: "row",
+            justifyContent: "center",
+            alignItems: "center",
+          }}
+        >
+          <TextField id="outlined-basic" label="New Task" variant="outlined" />
+          <Button>+ Add</Button>
         </Box>
       </Container>
     </>
@@ -27,6 +36,7 @@ export default function Home({ test }) {
 }
 
 export async function getServerSideProps(context) {
+  console.log("get serverside", context);
   return {
     props: {
       test: "This is a test",

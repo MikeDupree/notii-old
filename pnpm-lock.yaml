@@ -1,6 +1,7 @@
 lockfileVersion: 5.4
 
 specifiers:
+  '@babel/runtime-corejs3': ^7.21.0
   '@emotion/cache': ^11.10.5
   '@emotion/react': ^11.10.6
   '@emotion/server': ^11.10.0
@@ -23,6 +24,7 @@ specifiers:
   typescript: ^4.9.4
 
 dependencies:
+  '@babel/runtime-corejs3': 7.21.0
   '@emotion/cache': 11.10.5
   '@emotion/react': 11.10.6_pmekkgnqduwlme35zpnqhenc34
   '@emotion/server': 11.10.0
@@ -1221,6 +1223,14 @@ packages:
       core-js-pure: 3.29.1
       regenerator-runtime: 0.13.11
     dev: true
+
+  /@babel/runtime-corejs3/7.21.0:
+    resolution: {integrity: sha512-TDD4UJzos3JJtM+tHX+w2Uc+KWj7GV+VKKFdMVd2Rx8sdA19hcc3P3AHFYd5LVOw+pYuSd5lICC3gm52B6Rwxw==}
+    engines: {node: '>=6.9.0'}
+    dependencies:
+      core-js-pure: 3.29.1
+      regenerator-runtime: 0.13.11
+    dev: false
 
   /@babel/runtime/7.20.13:
     resolution: {integrity: sha512-gt3PKXs0DBoL9xCvOIIZ2NEqAGZqHjAnmVbfQtB620V0uReIQutpel14KcneZuer7UioY8ALKZ7iocavvzTNFA==}
@@ -2629,7 +2639,6 @@ packages:
   /core-js-pure/3.29.1:
     resolution: {integrity: sha512-4En6zYVi0i0XlXHVz/bi6l1XDjCqkKRq765NXuX+SnaIatlE96Odt5lMLjdxUiNI1v9OXI5DSLWYPlmTfkTktg==}
     requiresBuild: true
-    dev: true
 
   /core-util-is/1.0.2:
     resolution: {integrity: sha512-3lqz5YjWTYnW6dlDa5TLaTCcShfar1e40rmcJVwCBJC6mWlFuj0eCHIElmG1g5kyuJ/GD+8Wn4FFCcz4gJPfaQ==}
