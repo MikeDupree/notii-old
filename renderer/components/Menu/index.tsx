@@ -65,7 +65,6 @@ const AccountMenu = () => {
           aria-expanded={open ? "true" : undefined}
         >
           <Avatar
-            src={session.data.user.image}
             sx={{ width: 32, height: 32 }}
           />
         </IconButton>
@@ -106,10 +105,6 @@ const AccountMenu = () => {
         anchorOrigin={{ horizontal: "right", vertical: "bottom" }}
       >
         <MenuItem>
-          <Avatar
-            src={session.data.user.image}
-            sx={{ width: 32, height: 32 }}
-          />
           Profile
         </MenuItem>
         <MenuItem id="account" onClick={handleLinkClick}>
@@ -121,6 +116,12 @@ const AccountMenu = () => {
             <PersonAdd fontSize="small" />
           </ListItemIcon>
           Add another account
+        </MenuItem>
+        <MenuItem id="mail" onClick={handleLinkClick}>
+          <ListItemIcon>
+            <Settings fontSize="small" />
+          </ListItemIcon>
+          Mail
         </MenuItem>
         <MenuItem id="settings" onClick={handleLinkClick}>
           <ListItemIcon>

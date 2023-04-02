@@ -42,11 +42,11 @@ const Account = (props: Props) => {
             >
               <Box sx={{ display: "flex", flexDirection: "column" }}>
                 <Avatar
-                  src={data.user.image}
+                  src={data?.user?.image}
                   sx={{ width: 128, height: 128 }}
                 />
-                <Typography variant="body1">{data.user.name}</Typography>
-                <Typography variant="body1">{data.user.email}</Typography>
+                <Typography variant="body1">{data?.user?.name}</Typography>
+                <Typography variant="body1">{datai?.user?.email}</Typography>
               </Box>
             </Paper>
           </Grid>

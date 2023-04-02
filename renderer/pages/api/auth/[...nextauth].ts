@@ -1,5 +1,14 @@
-import NextAuth from "next-auth"
-import GithubProvider from "next-auth/providers/github"
+import NextAuth from "next-auth";
+import GithubProvider from "next-auth/providers/github";
+import GoogleProvider from "next-auth/providers/google";
+
+const scopes = [
+  "https://www.googleapis.com/auth/userinfo.email",
+  "https://www.googleapis.com/auth/userinfo.profile",
+  "https://www.googleapis.com/auth/calendar.events",
+  "https://www.googleapis.com/auth/drive",
+  "https://mail.google.com/",
+];
 
 // For more information on each option (and a full list of options) go to
 // https://next-auth.js.org/configuration/options
@@ -13,13 +22,26 @@ export default NextAuth({
       // @ts-ignore
       scope: "read:user",
     }),
+    GoogleProvider({
+      clientId: process.env.GOOGLE_CLIENT_ID,
+      clientSecret: process.env.GOOGLE_CLIENT_SECRET,
+      accessTokenUrl: "https://oauth2.googleapis.com/token",
+      authorization: {
+        params: {
+          scope: scopes.join(" "),
+          prompt: "consent",
+          access_type: "offline",
+          response_type: "code",
+        },
+      },
+    }),
   ],
   secret: process.env.SECRET,
   session: {
     // Use JSON Web Tokens for session instead of database sessions.
     // This option can be used with or without a database for users/accounts.
     // Note: `strategy` should be set to 'jwt' if no database is used.
-    strategy: 'jwt'
+    strategy: "jwt",
 
     // Seconds - How long until an idle session expires and is no longer valid.
     // maxAge: 30 * 24 * 60 * 60, // 30 days
@@ -66,13 +88,14 @@ export default NextAuth({
     async session({ session, token, user }) {
       const sessionResponse = {
         ...session,
-        user: { ...session.user, ...token }
-      }
+        ...token,
+        ...user,
+      };
       return sessionResponse;
     },
     async jwt({ token, user, account, profile, isNewUser }) {
-      return token;
-    }
+      return { token, user, account, profile, isNewUser };
+    },
   },
 
   // Events are useful for logging
@@ -81,4 +104,4 @@ export default NextAuth({
 
   // Enable debug messages in the console if you are having problems
   debug: false,
-})
+});
