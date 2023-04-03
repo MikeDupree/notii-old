@@ -123,6 +123,13 @@ const AccountMenu = () => {
           </ListItemIcon>
           Mail
         </MenuItem>
+
+        <MenuItem id="calendar" onClick={handleLinkClick}>
+          <ListItemIcon>
+            <Settings fontSize="small" />
+          </ListItemIcon>
+          Calendar
+        </MenuItem>
         <MenuItem id="settings" onClick={handleLinkClick}>
           <ListItemIcon>
             <Settings fontSize="small" />

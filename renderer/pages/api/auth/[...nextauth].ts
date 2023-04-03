@@ -5,9 +5,9 @@ import GoogleProvider from "next-auth/providers/google";
 const scopes = [
   "https://www.googleapis.com/auth/userinfo.email",
   "https://www.googleapis.com/auth/userinfo.profile",
-  "https://www.googleapis.com/auth/calendar.events",
   "https://www.googleapis.com/auth/drive",
   "https://mail.google.com/",
+  "https://www.googleapis.com/auth/calendar",
 ];
 
 // For more information on each option (and a full list of options) go to

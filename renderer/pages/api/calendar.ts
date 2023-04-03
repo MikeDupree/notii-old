@@ -3,8 +3,9 @@ import { getServerSession } from "next-auth/next";
 import { getSession } from "next-auth/react";
 import authOptions from "./auth/[...nextauth]";
 import { google } from "googleapis";
+import { log } from "console";
 
-const MailHandler: NextApiHandler = async (req, res) => {
+const CalendarHandler: NextApiHandler = async (req, res) => {
   // const session = await getServerSession(req, res, authOptions);
   const session = await getSession({ req });
   /*
@@ -41,6 +42,10 @@ session {
     refreshToken,
   });
 
+  if (!accessToken) {
+    res.status(401);
+  }
+
   const auth = new google.auth.OAuth2({
     clientId,
     clientSecret,
@@ -50,25 +55,43 @@ session {
     refresh_token: refreshToken,
   });
 
-  const mail = google.gmail({ version: "v1", auth });
-  const result = await mail.users.messages.list({
-    userId: "mikerdupree@gmail.com",
-    maxResults: 10,
-  });
-  const messages = [];
-  for (const msg of result.data.messages) {
+  const calendar = google.calendar({ version: "v3", auth });
 
-    console.log("msg", msg);
-
-    const message = await mail.users.messages.get({userId: "me", id: msg.id });
-    console.log("Message", message);
-    messages.push(message.data);
-
+  let d = new Date();
+  d.setDate(d.getDate() - 3);
+  const timeMin = d.toJSON()
+  d.setDate(d.getDate() + 6);
+  const timeMax = d.toJSON();
+  console.log("timeMin", timeMin);
+  console.log("timeMax", timeMax);
+  // const result = await calendar.events.list();
+  let eventsResult;
+  try {
+    eventsResult = await calendar.events.list({
+      calendarId: "mikerdupree@gmail.com",
+      timeMax,
+      timeMin,
+    });
+  } catch (e) {
+    console.log(e);
   }
-  console.log('messages', messages);
 
-  res.status(200).json({messages});
+  if (!eventsResult.data.items) {
+    return res.status(400);
+  }
 
+  console.log("Event Data", eventsResult?.data);
+  // console.log("events.list", eventsResult.data);
+
+  const result = await calendar.calendarList.list();
+  const { items, ...rest } = eventsResult.data
+  const calendarResponse = {
+    ...rest,
+    events: items || [],
+    calendars: result.data.items,
+  };
+
+  res.status(200).json(calendarResponse);
 };
 
-export default MailHandler;
+export default CalendarHandler;
