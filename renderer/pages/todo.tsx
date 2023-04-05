@@ -1,7 +1,11 @@
 import React from "react";
 import { Box, Button, Container, TextField, Typography } from "@mui/material";
+import axios from "axios";
 
 export default function Home({ test }) {
+  const add = () => {
+    axios.get("/api/updateStore").then(() => console.log("success!"));
+  };
   return (
     <>
       <Container maxWidth="lg">
@@ -28,7 +32,7 @@ export default function Home({ test }) {
           }}
         >
           <TextField id="outlined-basic" label="New Task" variant="outlined" />
-          <Button>+ Add</Button>
+          <Button onClick={add}>+ Add</Button>
         </Box>
       </Container>
     </>

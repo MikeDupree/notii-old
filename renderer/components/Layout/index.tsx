@@ -46,7 +46,7 @@ const Layout = ({ children }: Props) => {
   }
 
   return (
-    <div>
+    <div className="p-6">
       <Head>
         <title>Notii</title>
       </Head>
@@ -56,7 +56,9 @@ const Layout = ({ children }: Props) => {
         {breadcrumbs.length > 1 &&
           breadcrumbs.slice(0, breadcrumbs.length - 1).map((breadcrumb) => (
             <Link color="inherit" href={`/${breadcrumb}`}>
-              {breadcrumb == "" ? "Home" : breadcrumb}
+              <div className="text-slate-500 font-medium hover:text-slate-100">
+                {breadcrumb == "" ? "Home" : breadcrumb}
+              </div>
             </Link>
           ))}
         <Typography color="text.primary">{breadcrumbs.pop()}</Typography>

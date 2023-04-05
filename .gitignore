@@ -5,3 +5,6 @@ app
 dist
 .env
 example-nextjs
+
+#Development Store
+store.json

@@ -1,6 +1,7 @@
 import NextAuth from "next-auth";
 import GithubProvider from "next-auth/providers/github";
 import GoogleProvider from "next-auth/providers/google";
+import { readStore, updateStore } from "../../../lib/store";
 
 const scopes = [
   "https://www.googleapis.com/auth/userinfo.email",
@@ -85,16 +86,38 @@ export default NextAuth({
   callbacks: {
     // async signIn({ user, account, profile, email, credentials }) { return true },
     // async redirect({ url, baseUrl }) { return baseUrl },
-    async session({ session, token, user }) {
-      const sessionResponse = {
-        ...session,
-        ...token,
-        ...user,
-      };
-      return sessionResponse;
+    /*
+     *  Session Callback
+     */
+    async session(params) {
+      const { session, token, user } = params;
+      console.log("session callback");
+      console.log(params);
+      console.log("session response", { session, user, token: token?.token || token });
+
+      const store = readStore();
+      console.log('store', store);
+      const authType = token?.token?.account?.provider;
+      const userId = token?.token?.user?.id;
+
+      console.log("Auth Type:", authType);
+      console.log("User ID  :", userId);
+      if (authType && userId) {
+        console.log("Update Store");
+        updateStore(authType, userId, (token?.token || token) as Record<string, string>);
+      }
+
+      return { session, user, token: token?.token || token };
     },
-    async jwt({ token, user, account, profile, isNewUser }) {
-      return { token, user, account, profile, isNewUser };
+    /*
+     *  JWT Callback
+     */
+    async jwt(data) {
+      console.log("jwt callback");
+      console.log("data", data);
+      console.log("data.token", data.token);
+
+      return data;
     },
   },
 
