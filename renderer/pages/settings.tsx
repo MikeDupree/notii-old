@@ -54,7 +54,6 @@ export default function Home({ test }) {
 }
 
 export async function getServerSideProps(context) {
-  console.log("get serverside", context);
   return {
     props: {
       test: "This is a test",

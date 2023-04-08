@@ -11,6 +11,8 @@ const scopes = [
   "https://www.googleapis.com/auth/calendar",
 ];
 
+let userAccount;
+
 // For more information on each option (and a full list of options) go to
 // https://next-auth.js.org/configuration/options
 export default NextAuth({
@@ -84,39 +86,41 @@ export default NextAuth({
   // when an action is performed.
   // https://next-auth.js.org/configuration/callbacks
   callbacks: {
-    // async signIn({ user, account, profile, email, credentials }) { return true },
+    async signIn({ user, account, profile, email, credentials }) { 
+      userAccount = account;
+      return true;
+    },
     // async redirect({ url, baseUrl }) { return baseUrl },
     /*
      *  Session Callback
      */
     async session(params) {
       const { session, token, user } = params;
-      console.log("session callback");
-      console.log(params);
-      console.log("session response", { session, user, token: token?.token || token });
-
       // TODO Add proper validation for fields on token.token
       // type is unknown
-      const authType = token?.token?.account?.provider;
-      const userId = token?.token?.user?.id;
+      const authType = userAccount?.provider;
+      const userId = userAccount?.providerAccountId;
       const store = readStore(authType, userId);
-      console.log('store', store);
-
-      console.log("Auth Type:", authType);
-      console.log("User ID  :", userId);
-      const result = { session, user, token: token?.token || token };
+      // TODO do the store write in the jwt function
+      const sessionResponse = {
+        expires: session.expires,
+        user: token,
+        account: userAccount,
+      }
+      const result = { session: sessionResponse };
       if (authType && userId) {
         console.log("Update Store");
-        updateDataStore(authType, userId, result as  Record<string, unknown>);
+        updateStore(authType, userId, result as  Record<string, unknown>);
       }
-
-      return result;
+      // TODO only return the session data. we can read token data from the store
+      // this function is not expected to return the token so we're getting type errors
+      return sessionResponse;
     },
     /*
      *  JWT Callback
      */
     async jwt(data) {
-      return data;
+      return data.token;
     },
   },
 

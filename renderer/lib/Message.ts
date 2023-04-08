@@ -1,7 +1,7 @@
 import io from 'socket.io-client';
 import { Subject } from 'rxjs';
 
-const socket = io('http://localhost:8888');
+const socket = io('http://localhost:8989');
 
 // Create a subject to handle incoming messages from the server
 const messageSubject = new Subject();

@@ -4,9 +4,16 @@ import { createWindow } from "./helpers";
 import http from "http";
 import { Server } from "socket.io";
 import { log } from "console";
+import { readStore, updateDataStore } from "../store";
 
 const server = http.createServer();
-const io = new Server(server);
+const io = new Server(server, {
+  cors: {
+    origin: "http://localhost:8888", // Change this to the client's origin
+    methods: ["GET", "POST"],
+  },
+});
+
 log("=I= Server :: Init =I=");
 
 const isProd: boolean = process.env.NODE_ENV === "production";
@@ -36,12 +43,15 @@ if (isProd) {
     height: 600,
   });
 
+  console.log("test");
+
   if (isProd) {
     await mainWindow.loadURL("app://./index.html");
   } else {
     const port = process.argv[2];
     console.log("Server URL: ", port);
     await mainWindow.loadURL(`http://localhost:${port}/`);
+    console.log("port", port);
     mainWindow.webContents.openDevTools();
   }
 })();
@@ -63,6 +73,47 @@ io.on("connection", (socket) => {
   socket.on("message", (message) => {
     console.log(`Received message from client: ${message}`);
   });
-});
 
-io.listen(8888);
+  socket.on("todo:get", (message) => {
+    console.log("test::message", message);
+    if (!message.userId) {
+      console.log("error: no user id passed to TODO listener");
+      socket.emit("error", {
+        type: "storeGet",
+        message: "missing userId",
+        requestLogin: true,
+      });
+      return;
+    }
+    console.log("got userid");
+    const todos = readStore("todo", message.userId);
+    console.log("todos", todos);
+    socket.emit("todo", todos);
+  });
+  socket.on("storeUpdate:todo", (message) => {
+    console.log("storeUpdate:todo message", message);
+    if (message.success) {
+      console.log('emit todos');
+      socket.emit("todo", message.data);
+    }
+  });
+  socket.on("todo:add", (message) => {
+    console.log("test::message", message);
+    console.log(typeof message);
+    if (!message.userId) {
+      console.log("error: no user id passed to TODO listener");
+      socket.emit("error", {
+        type: "storeUpdate",
+        message: "missing userId",
+        requestLogin: true,
+      });
+      return;
+    }
+    console.log("got userid");
+    updateDataStore("todo", message.userId, message);
+  });
+});
+// server.listen(8989, () => {
+//   console.log(`Server listening on port 8888.`);
+// });
+io.listen(8989);
