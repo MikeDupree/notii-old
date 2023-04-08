@@ -1,7 +1,7 @@
 import NextAuth from "next-auth";
 import GithubProvider from "next-auth/providers/github";
 import GoogleProvider from "next-auth/providers/google";
-import { readStore, updateStore } from "../../../lib/store";
+import { readStore, updateDataStore, updateStore } from "../../../lib/store";
 
 const scopes = [
   "https://www.googleapis.com/auth/userinfo.email",
@@ -95,28 +95,27 @@ export default NextAuth({
       console.log(params);
       console.log("session response", { session, user, token: token?.token || token });
 
-      const store = readStore();
-      console.log('store', store);
+      // TODO Add proper validation for fields on token.token
+      // type is unknown
       const authType = token?.token?.account?.provider;
       const userId = token?.token?.user?.id;
+      const store = readStore(authType, userId);
+      console.log('store', store);
 
       console.log("Auth Type:", authType);
       console.log("User ID  :", userId);
+      const result = { session, user, token: token?.token || token };
       if (authType && userId) {
         console.log("Update Store");
-        updateStore(authType, userId, (token?.token || token) as Record<string, string>);
+        updateDataStore(authType, userId, result as  Record<string, unknown>);
       }
 
-      return { session, user, token: token?.token || token };
+      return result;
     },
     /*
      *  JWT Callback
      */
     async jwt(data) {
-      console.log("jwt callback");
-      console.log("data", data);
-      console.log("data.token", data.token);
-
       return data;
     },
   },

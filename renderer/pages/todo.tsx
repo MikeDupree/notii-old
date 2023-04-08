@@ -4,7 +4,7 @@ import axios from "axios";
 
 export default function Home({ test }) {
   const add = () => {
-    axios.get("/api/updateStore").then(() => console.log("success!"));
+    // axios.post("/api/updateDataStore").then(() => console.log("success!"));
   };
   return (
     <>

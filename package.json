@@ -29,6 +29,7 @@
     "googleapis": "105",
     "next-auth": "^4.20.1",
     "react-social-icons": "^5.15.0",
+    "socket.io": "^4.6.1",
     "three": "^0.151.2"
   },
   "devDependencies": {

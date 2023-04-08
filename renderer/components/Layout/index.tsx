@@ -1,10 +1,11 @@
-import React, { ReactNode } from "react";
+import React, { ReactNode, useEffect } from "react";
 import Link from "next/link";
 import Head from "next/head";
 import Menu from "../Menu";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/router";
 import { Container, Box, Button, Breadcrumbs, Typography } from "@mui/material";
+import { messageSubject } from "../../lib/Message";
 
 type Props = { children: ReactNode };
 
@@ -16,6 +17,18 @@ const Layout = ({ children }: Props) => {
   if (router.route === "/") {
     breadcrumbs = [""];
   }
+
+  useEffect(() => {
+    // Subscribe to incoming messages from the server
+    const subscription = messageSubject.subscribe((message) => {
+      console.log(`Received message in component: ${message}`);
+    });
+
+    return () => {
+      // Unsubscribe when the component unmounts
+      subscription.unsubscribe();
+    };
+  }, []);
 
   if (!data) {
     // No user logged in.
