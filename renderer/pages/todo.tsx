@@ -2,63 +2,60 @@ import React, { useEffect, useState } from "react";
 import { Box, Button, Container, TextField, Typography } from "@mui/material";
 import List from "@mui/material/List";
 import ListItem from "@mui/material/ListItem";
-import ListItemAvatar from "@mui/material/ListItemAvatar";
-import ListItemIcon from "@mui/material/ListItemIcon";
 import ListItemText from "@mui/material/ListItemText";
-import Avatar from "@mui/material/Avatar";
 import IconButton from "@mui/material/IconButton";
-import FormGroup from "@mui/material/FormGroup";
-import FormControlLabel from "@mui/material/FormControlLabel";
 import Checkbox from "@mui/material/Checkbox";
-import Grid from "@mui/material/Grid";
-import FolderIcon from "@mui/icons-material/Folder";
 
 import DeleteIcon from "@mui/icons-material/Delete";
-import axios from "axios";
-import { getSocket } from "../lib/SocketHandler";
 import { useSession } from "next-auth/react";
+
+import { ipcHandler } from "../src/ipc";
+import { ipcRenderer } from "electron";
 
 export default function Home({ test }) {
   const [todos, setTodos] = useState([]);
-  const [socket, setSocket] = useState(getSocket());
   const session = useSession();
-
-  const handleTodoUpdate = (message) => {
+  const socket = ipcHandler("todo");
+  const handleTodoUpdate = (event, message) => {
     console.log(`TODO socket message`);
     console.log(message);
     if (message && message.data) {
       setTodos(message.data);
     }
   };
+  ipcRenderer.addListener("todo:client", handleTodoUpdate);
 
   useEffect(() => {
     //request todo data for user.
-    socket.on("todo", handleTodoUpdate);
 
     // emit this when first mounting to get current todos
-    socket.emit("todo:get", { userId: session?.data?.user?.sub });
+    socket.send(
+      { userId: session?.data?.user?.sub },
+      { channelOverride: "todo:get" }
+    );
 
     return () => {
-      socket.off("todo", handleTodoUpdate);
+      // ipcRenderer.removeListener("todo:client", handleTodoUpdate);
     };
-  }, [socket]);
+  }, []);
 
   console.log(session);
   // Listen for messages from the server
 
   const add = (e) => {
-    console.log(e.target.value);
-    console.log(e.key);
-    console.log(new Date().getTime());
     if (e.key === "Enter") {
-      socket.emit("todo:add", {
-        type: "todo",
-        timestamp: new Date().getTime(),
-        value: e.target.value,
-        completed: false,
-        userId: session?.data?.user?.sub,
-        email: session.data?.user?.email,
-      });
+      console.log("sending message");
+      socket.send(
+        {
+          type: "todo",
+          timestamp: new Date().getTime(),
+          value: e.target.value,
+          completed: false,
+          userId: session?.data?.user?.sub,
+          email: session.data?.user?.email,
+        },
+        { channelOverride: "todo:add" }
+      );
     }
     // axios.post("/api/updateDataStore").then(() => console.log("success!"));
     // Send a message to the server

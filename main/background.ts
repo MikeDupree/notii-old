@@ -1,18 +1,12 @@
-import { app, Menu } from "electron";
+import { app, ipcMain, Menu } from "electron";
 import serve from "electron-serve";
-import { createWindow } from "./helpers";
-import http from "http";
-import { Server } from "socket.io";
+
+// removing socket.io and using ipc
 import { log } from "console";
+import { createWindow } from "./helpers";
 import { readStore, updateDataStore } from "../store";
 
-const server = http.createServer();
-const io = new Server(server, {
-  cors: {
-    origin: "http://localhost:8888", // Change this to the client's origin
-    methods: ["GET", "POST"],
-  },
-});
+
 
 log("=I= Server :: Init =I=");
 
@@ -38,13 +32,13 @@ if (isProd) {
 (async () => {
   await app.whenReady();
 
+  console.log(":*:Starting application:*:");
+
+  // Setup Window
   const mainWindow = createWindow("main", {
     width: 1000,
-    height: 600,
+    height: 1000,
   });
-
-  console.log("test");
-
   if (isProd) {
     await mainWindow.loadURL("app://./index.html");
   } else {
@@ -54,31 +48,24 @@ if (isProd) {
     console.log("port", port);
     mainWindow.webContents.openDevTools();
   }
-})();
 
-app.on("window-all-closed", () => {
-  app.quit();
-});
+  // IPC Handlers
+  // Listen for messages from the renderer process
+  ipcMain.on("message", (event, arg) => {
+    console.log(`Received message from renderer process: ${arg}`);
 
-//
-// Socket Handler
-//
-io.on("connection", (socket) => {
-  console.log("A user connected.");
-
-  // Send a message to the client
-  socket.emit("message", "Hello from the server!");
-
-  // Listen for messages from the client
-  socket.on("message", (message) => {
-    console.log(`Received message from client: ${message}`);
+    // Send a response back to the renderer process
+    event.sender.send("message:client", "Hello from the main process!");
   });
 
-  socket.on("todo:get", (message) => {
-    console.log("test::message", message);
+  // TODO build a plugin interface for registering ipc listeners
+
+  // The TODO Plugin
+  ipcMain.on("todo:get", (event, message) => {
+    console.log("todo:get message:", message);
     if (!message.userId) {
       console.log("error: no user id passed to TODO listener");
-      socket.emit("error", {
+      event.sender.send("error", {
         type: "storeGet",
         message: "missing userId",
         requestLogin: true,
@@ -88,21 +75,15 @@ io.on("connection", (socket) => {
     console.log("got userid");
     const todos = readStore("todo", message.userId);
     console.log("todos", todos);
-    socket.emit("todo", todos);
+    event.sender.send("todo:client", todos);
   });
-  socket.on("storeUpdate:todo", (message) => {
-    console.log("storeUpdate:todo message", message);
-    if (message.success) {
-      console.log('emit todos');
-      socket.emit("todo", message.data);
-    }
-  });
-  socket.on("todo:add", (message) => {
+
+  ipcMain.on("todo:add",async (event, message) => {
     console.log("test::message", message);
     console.log(typeof message);
     if (!message.userId) {
       console.log("error: no user id passed to TODO listener");
-      socket.emit("error", {
+      event.sender.send("error", {
         type: "storeUpdate",
         message: "missing userId",
         requestLogin: true,
@@ -110,10 +91,14 @@ io.on("connection", (socket) => {
       return;
     }
     console.log("got userid");
-    updateDataStore("todo", message.userId, message);
+    const result = await updateDataStore("todo", message.userId, message);
+    console.log('updateDataStore result:', result);
+    event.sender.send('todo:client', result?.data);
   });
+
+})();
+
+app.on("window-all-closed", () => {
+  app.quit();
 });
-// server.listen(8989, () => {
-//   console.log(`Server listening on port 8888.`);
-// });
-io.listen(8989);
+

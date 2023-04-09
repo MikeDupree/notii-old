@@ -1,6 +1,7 @@
+import { ipcMain } from "electron";
 import fs from "fs";
+import { promisify } from "util";
 import { v4 as uuidv4 } from "uuid";
-import { getSocket } from "./renderer/lib/SocketHandler";
 
 type DataStoreEntry = {
   id: "string";
@@ -13,14 +14,15 @@ interface DataStore {
   data: DataStoreEntry[];
 }
 
-export const updateDataStore = (
+export const updateDataStore = async (
   storeName: string,
   userId: string,
   data: Record<string, unknown>
-): void => {
+): Promise<{ success: boolean; message: string; data: unknown }> => {
   let response = {
     success: true,
     message: "Store sucess",
+    data: null,
   };
 
   let storeFilePath = `${userId}.${storeName}.json`;
@@ -71,21 +73,26 @@ export const updateDataStore = (
     store.data.push(data);
   }
 
-      const socket = getSocket();
-  fs.writeFile(storeFilePath, JSON.stringify(store), (err) => {
-    if (err) {
-      response = {
-        success: false,
-        message: err?.message,
-      };
-      socket.emit(`storeUpdate:${storeName}`, response);
-    } else {
-      console.log("File written successfully\n");
-      response['data'] = readStore(storeName, userId);
-      socket.emit(`storeUpdate:${storeName}`, response);
-    }
-  });
+  const writer = promisify(fs.writeFile);
+  const result = await writer(storeFilePath, JSON.stringify(store));
+  console.log('write result', result);
+  // (err) => {
+  //   if (err) {
+  //     response = {
+  //       success: false,
+  //       message: err?.message,
+  //     };
+  //     ipcMain.emit(`${storeName}:client`, response);
+  //   } else {
+  //     console.log("File written successfully\n");
+  //     console.log("response", response);
+  //     console.log("send on channel: ", `${storeName}:client`);
+  //     ipcMain.emit(`${storeName}:client`, response);
+  //   }
+  // }
 
+  response.data = store;
+  return response;
 };
 
 export const readStore = (storeName: string, userId: string) => {
