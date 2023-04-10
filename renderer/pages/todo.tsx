@@ -27,7 +27,6 @@ export default function Home({ test }) {
 
   useEffect(() => {
     //request todo data for user.
-
     // emit this when first mounting to get current todos
     socket.send(
       { userId: session?.data?.user?.sub },
@@ -60,6 +59,15 @@ export default function Home({ test }) {
     // axios.post("/api/updateDataStore").then(() => console.log("success!"));
     // Send a message to the server
   };
+
+  const handleDelete = (id) => {
+    console.log("Deleteing todo", id);
+    socket.send(
+      { id, userId: session?.data?.user?.sub },
+      { channelOverride: "todo:delete" }
+    );
+  }
+
   return (
     <>
       <Container maxWidth="lg">
@@ -99,7 +107,7 @@ export default function Home({ test }) {
             {todos.map((todo) => (
               <ListItem
                 secondaryAction={
-                  <IconButton edge="end" aria-label="delete">
+                  <IconButton onClick={() => { handleDelete(todo.id) }} edge="end" aria-label="delete">
                     <DeleteIcon />
                   </IconButton>
                 }

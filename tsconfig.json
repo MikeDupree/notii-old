@@ -17,7 +17,19 @@
     "moduleResolution": "node",
     "resolveJsonModule": true,
     "isolatedModules": true,
-    "jsx": "preserve"
+    "jsx": "preserve",
+    "paths": {
+      "@modules/*": [
+        "./lib/modules/*"
+      ],
+      "@tools/*": [
+        "./lib/tools/*"
+      ],
+      "@client/*": [
+        "./renderer/lib/*",
+        "./renderer/src/*"
+      ]
+    }
   },
   "exclude": [
     "node_modules",

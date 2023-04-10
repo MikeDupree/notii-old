@@ -108,7 +108,6 @@ export const readStore = (storeName: string, userId: string) => {
     console.log("=i= Store Read Error =i=");
     return;
   }
-  console.log("readStore::data", data);
   if (!data) {
     return;
   }
