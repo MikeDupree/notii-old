@@ -1,21 +1,23 @@
 import { IpcMainEvent } from "electron";
-import { readStore, updateDataStore } from "../store";
+import { readStore, updateDataStore, overwriteDataStore } from "../../store";
 
 const updateStore = async (
   event: IpcMainEvent,
   userId: string,
-  data: Record<string, unknown>,
+  store: Record<string, unknown>,
   config?: { force: boolean }
 ) => {
-  const result = await updateDataStore("todo", userId, data, config);
-  console.log("updateDataStore result:", result);
-  event.sender.send("todo:client", data);
+  if (config?.force) {
+    await overwriteDataStore("todo", userId, store);
+    event.sender.send("todo:client", store);
+    return;
+  }
+  const result = await updateDataStore("todo", userId, store?.data, config);
+  event.sender.send("todo:client", store?.data);
 };
 
 const getHandler = (event, message) => {
-  console.log("todo:get message:", message);
   if (!message.userId) {
-    console.log("error: no user id passed to TODO listener");
     event.sender.send("error", {
       type: "storeGet",
       message: "missing userId",
@@ -23,9 +25,7 @@ const getHandler = (event, message) => {
     });
     return;
   }
-  console.log("got userid");
   const todos = readStore("todo", message.userId);
-  console.log("todos", todos);
   event.sender.send("todo:client", todos);
 };
 
@@ -35,10 +35,7 @@ const getSubscriber = {
 };
 
 const createHandler = async (event, message) => {
-  console.log("todo::createHandler", message);
-  console.log(typeof message);
   if (!message.userId) {
-    console.log("error: no user id passed to TODO listener");
     event.sender.send("error", {
       type: "storeUpdate",
       message: "missing userId",
@@ -46,9 +43,7 @@ const createHandler = async (event, message) => {
     });
     return;
   }
-  console.log("got userid");
   const result = await updateDataStore("todo", message.userId, message);
-  console.log("updateDataStore result:", result);
   event.sender.send("todo:client", result?.data);
 };
 
@@ -58,22 +53,18 @@ const createSubscriber = {
 };
 
 const deleteHandler = (event, message) => {
-  console.log("todo::deleteHandler", message);
   if (!message || !message.id) {
     console.log("no id, exiting");
     return;
   }
 
-  console.log("read store");
-
   let store = readStore("todo", message.userId);
 
-  console.log("store data:", store.data);
-
   let count = store.data.length;
+  // Filter out the entry being deleted.
   store.data = store.data.filter((entry) => entry.id !== message.id);
-  count = count - store.data.length;
-  console.log("Entries Deleted:  ", count);
+
+  // force update store data.
   updateStore(event, message.userId, store, { force: true });
 };
 

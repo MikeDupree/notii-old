@@ -3,7 +3,7 @@ import { ipcRenderer } from "electron";
 export const ipcHandler = (channel: string) => {
   const sendMessage = (message: unknown, config?: {channelOverride?:string}) => {
     let sendChannel = channel;
-    if(config.channelOverride){
+    if(config?.channelOverride){
       sendChannel = config.channelOverride;
     }
     console.log('sending on channel:', sendChannel);

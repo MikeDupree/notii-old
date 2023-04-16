@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { Canvas } from "@react-three/fiber";
 import Container from "@mui/material/Container";
 import Typography from "@mui/material/Typography";
@@ -6,12 +6,28 @@ import Box from "@mui/material/Box";
 import { ThreeDBox } from "../components/3DBox";
 
 import { ipcHandler } from "../src/ipc";
+import { ipcRenderer } from "electron";
 
-const ipcRenderer = ipcHandler("message");
 export default function Home({ test }) {
- ipcRenderer.send("message", "Home Component Mounted");
- ipcRenderer.register((e, message) => {console.log('received message on client:', message)});
 
+  const socket = ipcHandler("modules");
+
+  const handleTodoUpdate = (event, message) => {
+    console.log(`TODO socket message`);
+    console.log(message);
+  };
+  ipcRenderer.addListener("modules:client", handleTodoUpdate);
+  useEffect(() => {
+    //request todo data for user.
+    // emit this when first mounting to get current todos
+    socket.send(
+      { channelOverride: "modules" }
+    );
+
+    return () => {
+      // ipcRenderer.removeListener("todo:client", handleTodoUpdate);
+    };
+  }, []);
   return (
     <>
       <Container maxWidth="lg">

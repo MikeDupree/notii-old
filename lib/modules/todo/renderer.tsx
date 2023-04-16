@@ -9,10 +9,10 @@ import Checkbox from "@mui/material/Checkbox";
 import DeleteIcon from "@mui/icons-material/Delete";
 import { useSession } from "next-auth/react";
 
-import { ipcHandler } from "../src/ipc";
+import { ipcHandler } from "../../../renderer/src/ipc";
 import { ipcRenderer } from "electron";
 
-export default function Home({ test }) {
+export default function Todo({ test }) {
   const [todos, setTodos] = useState([]);
   const session = useSession();
   const socket = ipcHandler("todo");
@@ -126,12 +126,4 @@ export default function Home({ test }) {
       </Container>
     </>
   );
-}
-
-export async function getServerSideProps(context) {
-  return {
-    props: {
-      test: "This is a test",
-    },
-  };
 }

@@ -4,7 +4,9 @@ import fs from "fs";
 import chalk from "chalk";
 import { createWindow } from "./helpers";
 
-const testSubscribers = [
+let moduleConfigs = [];
+
+const defaultSubscribers = [
   {
     channel: "message",
     callback: (event, arg) => {
@@ -13,9 +15,18 @@ const testSubscribers = [
       event.sender.send("message:client", "Hello from the main process!");
     },
   },
+  {
+    channel: "modules",
+    callback: (event, arg) => {
+      console.log(`Received message from renderer process: ${arg}`);
+      // Send a response back to the renderer process
+      event.sender.send("modules:client", moduleConfigs);
+    },
+  },
+  ,
 ];
 
-let subscribers = [...testSubscribers];
+let subscribers = [...defaultSubscribers];
 
 // TODO determine a good modules location
 // and update this to load a path based on
@@ -27,9 +38,13 @@ const modulesLocation = "./lib/modules";
 const modulePaths = fs.readdirSync(modulesLocation);
 const loadModules = async () => {
   for (const modulePath of modulePaths) {
+    console.log("module path", modulePath);
     let module = await import(`../lib/modules/${modulePath}`);
+    console.log("module", module);
+    console.log("config", module?.config);
     // Handle module subscribers
     subscribers = [...subscribers, ...module?.subscribers];
+    moduleConfigs = [...moduleConfigs, module?.config];
   }
 };
 
@@ -60,7 +75,6 @@ const log = (
 const isProd: boolean = process.env.NODE_ENV === "production";
 const defaultMenu = Menu.getApplicationMenu();
 
-
 // const customMenu = [
 //   {
 //     label: "Apps",
@@ -72,7 +86,7 @@ const defaultMenu = Menu.getApplicationMenu();
 if (isProd) {
   serve({ directory: "app" });
 } else {
-  log('Running development mode.', 'info');
+  log("Running development mode.", "info");
   app.setPath("userData", `${app.getPath("userData")} (development)`);
 }
 
@@ -99,7 +113,7 @@ if (isProd) {
   // IPC Handlers
   // Register Event Subscribers;
   for (const subscriber of subscribers) {
-    log(`Subscribing:, ${subscriber?.channel}`, 'info');
+    log(`Subscribing:, ${subscriber?.channel}`, "info");
     ipcMain.on(subscriber.channel, subscriber.callback);
   }
 })();
