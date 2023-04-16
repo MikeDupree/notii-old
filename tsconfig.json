@@ -19,13 +19,13 @@
     "isolatedModules": true,
     "jsx": "preserve",
     "paths": {
-      "@modules/*": [
+      "@/modules/*": [
         "./lib/modules/*"
       ],
-      "@tools/*": [
+      "@/tools/*": [
         "./lib/tools/*"
       ],
-      "@client/*": [
+      "@/client/*": [
         "./renderer/lib/*",
         "./renderer/src/*"
       ]

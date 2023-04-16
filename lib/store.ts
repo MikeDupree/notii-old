@@ -1,14 +1,19 @@
-import { ipcMain } from "electron";
 import fs from "fs";
 import { promisify } from "util";
 import { v4 as uuidv4 } from "uuid";
 
-type DataStoreEntry = {
+const getStorePath = () => {
+  //TODO read OS type and determine path to store.
+  // IE: Linux = ~/.config/notii/store
+  return "./store";
+};
+
+export type DataStoreEntry = {
   id: "string";
   [key: string]: unknown;
 };
 
-interface DataStore {
+export interface DataStore {
   name: string;
   owner: string;
   data: DataStoreEntry[];
@@ -17,7 +22,8 @@ interface DataStore {
 export const updateDataStore = async (
   storeName: string,
   userId: string,
-  data: Record<string, unknown>
+  data: Record<string, unknown>,
+  config?: { force: boolean }
 ): Promise<{ success: boolean; message: string; data: unknown }> => {
   let response = {
     success: true,
@@ -57,11 +63,18 @@ export const updateDataStore = async (
       existingData = matchingData.pop();
       for (const [i, entry] of store.data) {
         if (entry.id === data.id) {
+          updated = true;
+          console.log("update data", data);
+          if (config?.force) {
+            console.log("Overwrite existingData");
+            store.data[i] = data;
+            return;
+          }
+          console.log("Merge existingData");
           store.data[i] = {
             ...existingData,
             ...data,
           };
-          updated = true;
         }
       }
     }
@@ -74,31 +87,23 @@ export const updateDataStore = async (
   }
 
   const writer = promisify(fs.writeFile);
-  const result = await writer(storeFilePath, JSON.stringify(store));
-  console.log('write result', result);
-  // (err) => {
-  //   if (err) {
-  //     response = {
-  //       success: false,
-  //       message: err?.message,
-  //     };
-  //     ipcMain.emit(`${storeName}:client`, response);
-  //   } else {
-  //     console.log("File written successfully\n");
-  //     console.log("response", response);
-  //     console.log("send on channel: ", `${storeName}:client`);
-  //     ipcMain.emit(`${storeName}:client`, response);
-  //   }
-  // }
-
+  const result = await writer(
+    `${getStorePath()}/${storeFilePath}`,
+    JSON.stringify(store)
+  );
+  console.log("write result", result);
+  // (err) =>
   response.data = store;
   return response;
 };
 
 export const readStore = (storeName: string, userId: string) => {
   let data = null;
+  if (!storeName || !userId) {
+    return;
+  }
   try {
-    data = fs.readFileSync(`${userId}.${storeName}.json`, {
+    data = fs.readFileSync(`${getStorePath()}/${userId}.${storeName}.json`, {
       encoding: "utf8",
       flag: "r",
     });

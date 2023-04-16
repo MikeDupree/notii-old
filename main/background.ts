@@ -1,11 +1,8 @@
 import { app, ipcMain, Menu } from "electron";
 import serve from "electron-serve";
-
-// removing socket.io and using ipc
-import { createWindow } from "./helpers";
-import { readStore, updateDataStore } from "../store";
+import fs from "fs";
 import chalk from "chalk";
-import { subscribers as todoSubscribers } from "../lib/modules/todo";
+import { createWindow } from "./helpers";
 
 const testSubscribers = [
   {
@@ -18,9 +15,27 @@ const testSubscribers = [
   },
 ];
 
-const subscribers = [...testSubscribers, ...todoSubscribers];
+let subscribers = [...testSubscribers];
 
-console.log(chalk.greenBright("=I= Server :: Init =I="));
+// TODO determine a good modules location
+// and update this to load a path based on
+// OS and load from there.
+/*
+ * Load modules
+ */
+const modulesLocation = "./lib/modules";
+const modulePaths = fs.readdirSync(modulesLocation);
+const loadModules = async () => {
+  for (const modulePath of modulePaths) {
+    let module = await import(`../lib/modules/${modulePath}`);
+    // Handle module subscribers
+    subscribers = [...subscribers, ...module?.subscribers];
+  }
+};
+
+/**
+ * Logging
+ */
 const log = (
   message: unknown,
   type = "msg",
@@ -45,7 +60,6 @@ const log = (
 const isProd: boolean = process.env.NODE_ENV === "production";
 const defaultMenu = Menu.getApplicationMenu();
 
-console.log("defaultMenu native menu", defaultMenu);
 
 // const customMenu = [
 //   {
@@ -58,10 +72,12 @@ console.log("defaultMenu native menu", defaultMenu);
 if (isProd) {
   serve({ directory: "app" });
 } else {
+  log('Running development mode.', 'info');
   app.setPath("userData", `${app.getPath("userData")} (development)`);
 }
 
 (async () => {
+  await loadModules();
   await app.whenReady();
 
   log(":*:Starting application:*:");
@@ -71,6 +87,7 @@ if (isProd) {
     width: 1000,
     height: 1000,
   });
+
   if (isProd) {
     await mainWindow.loadURL("app://./index.html");
   } else {
@@ -82,7 +99,7 @@ if (isProd) {
   // IPC Handlers
   // Register Event Subscribers;
   for (const subscriber of subscribers) {
-    log(`Subscribing:, ${subscriber}`);
+    log(`Subscribing:, ${subscriber?.channel}`, 'info');
     ipcMain.on(subscriber.channel, subscriber.callback);
   }
 })();

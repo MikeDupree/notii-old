@@ -1,7 +1,13 @@
-import { readStore, updateDataStore } from "../../store";
+import { IpcMainEvent } from "electron";
+import { readStore, updateDataStore } from "../store";
 
-const updateStore = async (event, userId, data) => {
-  const result = await updateDataStore("todo", userId, data);
+const updateStore = async (
+  event: IpcMainEvent,
+  userId: string,
+  data: Record<string, unknown>,
+  config?: { force: boolean }
+) => {
+  const result = await updateDataStore("todo", userId, data, config);
   console.log("updateDataStore result:", result);
   event.sender.send("todo:client", data);
 };
@@ -68,12 +74,12 @@ const deleteHandler = (event, message) => {
   store.data = store.data.filter((entry) => entry.id !== message.id);
   count = count - store.data.length;
   console.log("Entries Deleted:  ", count);
-  updateStore(event, message.userId, store);
+  updateStore(event, message.userId, store, { force: true });
 };
 
 const deleteSubscriber = {
   channel: "todo:delete",
   callback: deleteHandler,
-}
+};
 
 export const subscribers = [getSubscriber, createSubscriber, deleteSubscriber];
