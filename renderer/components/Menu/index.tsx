@@ -1,4 +1,4 @@
-import React, { MouseEvent } from "react";
+import React, { MouseEvent, useState } from "react";
 import Link from "next/link";
 import Box from "@mui/material/Box";
 import Avatar from "@mui/material/Avatar";
@@ -27,7 +27,7 @@ const getRoute = (id: string, user: any) => {
   return id;
 };
 
-const AccountMenu = () => {
+export const AccountMenu = () => {
   const session = useSession();
   const router = useRouter();
   console.log("session", session);
@@ -65,6 +65,7 @@ const AccountMenu = () => {
           aria-expanded={open ? "true" : undefined}
         >
           <Avatar
+            src={(session?.data?.user as { picture: string })?.picture}
             sx={{ width: 32, height: 32 }}
           />
         </IconButton>
@@ -104,9 +105,7 @@ const AccountMenu = () => {
         transformOrigin={{ horizontal: "right", vertical: "top" }}
         anchorOrigin={{ horizontal: "right", vertical: "bottom" }}
       >
-        <MenuItem>
-          Profile
-        </MenuItem>
+        <MenuItem>Profile</MenuItem>
         <MenuItem id="account" onClick={handleLinkClick}>
           <Avatar /> My account
         </MenuItem>
@@ -157,16 +156,19 @@ export default function Menu() {
   if (!session.data) {
     return null;
   }
-
   return (
     <React.Fragment>
       <Box sx={{ display: "flex", alignItems: "center", textAlign: "center" }}>
         <Link href="/">
           <Typography sx={{ minWidth: 100 }}>Dashboard</Typography>
         </Link>
-        <Link href="/todo">
-          <Typography sx={{ minWidth: 100 }}>Tasks</Typography>
-        </Link>
+        <>
+          {modulesEnabled.map((module) => (
+            <Link href={module.url}>
+              <Typography sx={{ minWidth: 100 }}>{module.name}</Typography>
+            </Link>
+          ))}
+        </>
         <div style={{ flexGrow: 1 }} />
         <AccountMenu />
       </Box>

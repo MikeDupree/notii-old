@@ -6,7 +6,7 @@ import CssBaseline from "@mui/material/CssBaseline";
 import { CacheProvider, EmotionCache } from "@emotion/react";
 import { theme, createEmotionCache } from "../theme";
 import { SessionProvider } from "next-auth/react";
-import Layout from "../components/Layout";
+import Layout from "../components/Layout/layout";
 import "../theme/tailwind.css";
 import "../theme/dist/output.css";
 // Client-side cache, shared for the whole session of the user in the browser.
