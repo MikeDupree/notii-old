@@ -6,6 +6,17 @@ module.exports = {
 
   // main process' webpack config
   webpack: (config, env) => {
+    console.log(config.module);
+    config.module.rules.push({
+        test: /\.(jsx|tsx)$/,
+        exclude: /node_modules/,
+        use: {
+          loader: 'babel-loader',
+          options: {
+            presets: ['@babel/preset-react']
+          }
+        }
+    });
     return config;
   },
 };

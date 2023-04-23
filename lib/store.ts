@@ -1,14 +1,20 @@
-import { ipcMain } from "electron";
+import { log } from "console";
 import fs from "fs";
 import { promisify } from "util";
 import { v4 as uuidv4 } from "uuid";
 
-type DataStoreEntry = {
+const getStorePath = () => {
+  //TODO read OS type and determine path to store.
+  // IE: Linux = ~/.config/notii/store
+  return "./store";
+};
+
+export type DataStoreEntry = {
   id: "string";
   [key: string]: unknown;
 };
 
-interface DataStore {
+export interface DataStore {
   name: string;
   owner: string;
   data: DataStoreEntry[];
@@ -17,7 +23,8 @@ interface DataStore {
 export const updateDataStore = async (
   storeName: string,
   userId: string,
-  data: Record<string, unknown>
+  data: Record<string, unknown>,
+  config?: { force: boolean }
 ): Promise<{ success: boolean; message: string; data: unknown }> => {
   let response = {
     success: true,
@@ -26,26 +33,27 @@ export const updateDataStore = async (
   };
 
   let storeFilePath = `${userId}.${storeName}.json`;
-  let skipChecks = false;
+  let isNewStore = false;
+  let isNewEntry = false;
   let updated = false;
 
   if (!data.id) {
     data.id = uuidv4();
-    skipChecks = true;
+    isNewEntry = true;
   }
 
   let store = readStore(storeName, userId);
   if (!store) {
-    console.log("Initializing store!");
     store = {
       name: storeName,
       owner: userId,
       data: [data],
     };
-    skipChecks = true;
+    isNewEntry = true;
+    isNewStore = true;
   }
 
-  if (!skipChecks) {
+  if (!isNewEntry) {
     let existingData = {};
     const matchingData = store.data.filter(
       (entry: DataStoreEntry) => entry.id === data.id
@@ -57,48 +65,64 @@ export const updateDataStore = async (
       existingData = matchingData.pop();
       for (const [i, entry] of store.data) {
         if (entry.id === data.id) {
+          updated = true;
+          if (config?.force) {
+            store.data[i] = data;
+            return;
+          }
           store.data[i] = {
             ...existingData,
             ...data,
           };
-          updated = true;
         }
       }
     }
   }
 
-  // Append new data if skipping checks or if we did check for existing DataStoreEntry
-  // and didn't find anything.
-  if (skipChecks || (!skipChecks && updated)) {
+  // If this is not a new store, but is a new entry, and doesnt update an existing entry.
+  if (!isNewStore && isNewEntry && !updated) {
     store.data.push(data);
   }
 
   const writer = promisify(fs.writeFile);
-  const result = await writer(storeFilePath, JSON.stringify(store));
-  console.log('write result', result);
-  // (err) => {
-  //   if (err) {
-  //     response = {
-  //       success: false,
-  //       message: err?.message,
-  //     };
-  //     ipcMain.emit(`${storeName}:client`, response);
-  //   } else {
-  //     console.log("File written successfully\n");
-  //     console.log("response", response);
-  //     console.log("send on channel: ", `${storeName}:client`);
-  //     ipcMain.emit(`${storeName}:client`, response);
-  //   }
-  // }
+  const result = await writer(
+    `${getStorePath()}/${storeFilePath}`,
+    JSON.stringify(store)
+  );
 
   response.data = store;
   return response;
 };
 
+export const overwriteDataStore = async (
+  storeName: string,
+  userId: string,
+  store: Record<string, unknown>
+): Promise<{ success: boolean; message: string; data: unknown }> => {
+  let response = {
+    success: true,
+    message: "Store sucess",
+    data: null,
+  };
+
+  let storeFilePath = `${userId}.${storeName}.json`;
+
+  const writer = promisify(fs.writeFile);
+  await writer(
+    `${getStorePath()}/${storeFilePath}`,
+    JSON.stringify(store)
+  );
+
+  response.data = store;
+  return response;
+};
 export const readStore = (storeName: string, userId: string) => {
   let data = null;
+  if (!storeName || !userId) {
+    return;
+  }
   try {
-    data = fs.readFileSync(`${userId}.${storeName}.json`, {
+    data = fs.readFileSync(`${getStorePath()}/${userId}.${storeName}.json`, {
       encoding: "utf8",
       flag: "r",
     });
@@ -108,7 +132,6 @@ export const readStore = (storeName: string, userId: string) => {
     console.log("=i= Store Read Error =i=");
     return;
   }
-  console.log("readStore::data", data);
   if (!data) {
     return;
   }

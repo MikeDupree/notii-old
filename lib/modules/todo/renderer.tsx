@@ -9,10 +9,11 @@ import Checkbox from "@mui/material/Checkbox";
 import DeleteIcon from "@mui/icons-material/Delete";
 import { useSession } from "next-auth/react";
 
-import { ipcHandler } from "../src/ipc";
+import { ipcHandler } from "../../../renderer/src/ipc";
 import { ipcRenderer } from "electron";
 
-export default function Home({ test }) {
+export default function Todo({ test }) {
+   console.log('TODO', ipcRenderer);
   const [todos, setTodos] = useState([]);
   const session = useSession();
   const socket = ipcHandler("todo");
@@ -24,6 +25,7 @@ export default function Home({ test }) {
       setTodos(message.data);
     }
   };
+  console.log('regiserting handleTodoUpdate', ipcRenderer);
   ipcRenderer.addListener("todo:client", handleTodoUpdate);
 
   useEffect(() => {
@@ -68,7 +70,7 @@ export default function Home({ test }) {
   };
 
   return (
-    <>
+    <div>
       <Container maxWidth="lg">
         <Box
           sx={{
@@ -124,14 +126,6 @@ export default function Home({ test }) {
           </List>
         </Box>
       </Container>
-    </>
+    </div>
   );
-}
-
-export async function getServerSideProps(context) {
-  return {
-    props: {
-      test: "This is a test",
-    },
-  };
 }

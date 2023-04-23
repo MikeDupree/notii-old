@@ -1,16 +1,13 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { Canvas } from "@react-three/fiber";
 import Container from "@mui/material/Container";
 import Typography from "@mui/material/Typography";
 import Box from "@mui/material/Box";
 import { ThreeDBox } from "../components/3DBox";
+import { Button } from "@mui/material";
+import { useSession, signIn, signOut } from "next-auth/react"
 
-import { ipcHandler } from "../src/ipc";
-
-const ipcRenderer = ipcHandler("message");
 export default function Home({ test }) {
- ipcRenderer.send("message", "Home Component Mounted");
- ipcRenderer.register((e, message) => {console.log('received message on client:', message)});
 
   return (
     <>
@@ -35,7 +32,7 @@ export default function Home({ test }) {
             <ThreeDBox position={[1.2, 0, 0]} />
           </Canvas>
 
-          <iframe src="https://mail.google.com/" />
+          <Button onClick={() => signIn()}> Gmail </Button>
         </Box>
       </Container>
     </>

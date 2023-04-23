@@ -23,6 +23,7 @@ export default function Mail({ test }) {
         setMessages(res.data.messages);
       })
       .catch((err) => {
+        console.error('mail load error:', err);
         setFailure(true);
       });
   }, []);

@@ -18,13 +18,13 @@ let userAccount;
 export default NextAuth({
   // https://next-auth.js.org/configuration/providers
   providers: [
-    GithubProvider({
-      clientId: process.env.GITHUB_ID,
-      clientSecret: process.env.GITHUB_SECRET,
-      // https://docs.github.com/en/developers/apps/building-oauth-apps/scopes-for-oauth-apps
-      // @ts-ignore
-      scope: "read:user",
-    }),
+    // GithubProvider({
+    //   clientId: process.env.GITHUB_ID,
+    //   clientSecret: process.env.GITHUB_SECRET,
+    //   // https://docs.github.com/en/developers/apps/building-oauth-apps/scopes-for-oauth-apps
+    //   // @ts-ignore
+    //   scope: "read:user",
+    // }),
     GoogleProvider({
       clientId: process.env.GOOGLE_CLIENT_ID,
       clientSecret: process.env.GOOGLE_CLIENT_SECRET,
@@ -96,6 +96,9 @@ export default NextAuth({
      */
     async session(params) {
       const { session, token, user } = params;
+      console.log('session', session);
+      console.log('token', token);
+      console.log('user', user);
       // TODO Add proper validation for fields on token.token
       // type is unknown
       const authType = userAccount?.provider;
@@ -120,7 +123,8 @@ export default NextAuth({
      *  JWT Callback
      */
     async jwt(data) {
-      return data.token;
+      console.log('data', data);
+      return {...data.token, ...data?.account};
     },
   },
 

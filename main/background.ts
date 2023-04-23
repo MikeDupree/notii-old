@@ -1,104 +1,123 @@
 import { app, ipcMain, Menu } from "electron";
 import serve from "electron-serve";
-
-// removing socket.io and using ipc
-import { log } from "console";
+import fs from "fs";
+import chalk from "chalk";
 import { createWindow } from "./helpers";
-import { readStore, updateDataStore } from "../store";
 
+let moduleConfigs = [];
 
+const defaultSubscribers = [
+  {
+    channel: "message",
+    callback: (event, arg) => {
+      console.log(`Received message from renderer process: ${arg}`);
+      // Send a response back to the renderer process
+      event.sender.send("message:client", "Hello from the main process!");
+    },
+  },
+  {
+    channel: "modules",
+    callback: (event, arg) => {
+      console.log(`Received message from renderer process: ${arg}`);
+      // Send a response back to the renderer process
+      event.sender.send("modules:client", moduleConfigs);
+    },
+  },
+];
 
-log("=I= Server :: Init =I=");
+let subscribers = [...defaultSubscribers];
+
+// TODO determine a good modules location
+// and update this to load a path based on
+// OS and load from there.
+/*
+ * Load modules
+ */
+const modulesLocation = "./lib/modules";
+const modulePaths = fs.readdirSync(modulesLocation);
+const loadModules = async () => {
+  for (const modulePath of modulePaths) {
+    console.log("module path", modulePath);
+    let module = await import(`../lib/modules/${modulePath}`);
+    console.log("module", module);
+    console.log("config", module?.config);
+    // Handle module subscribers
+    subscribers = [...subscribers, ...module?.subscribers];
+    moduleConfigs = [...moduleConfigs, module?.config];
+  }
+};
+
+/**
+ * Logging
+ */
+const log = (
+  message: unknown,
+  type = "msg",
+  options = {
+    toString: false,
+  }
+) => {
+  let color = chalk.grey;
+  switch (type) {
+    case "err":
+      color = chalk.red;
+    case "info":
+      color = chalk.yellow;
+  }
+  console.log(color(message));
+  if (!options.toString) {
+    return;
+  }
+  return color(message);
+};
 
 const isProd: boolean = process.env.NODE_ENV === "production";
 const defaultMenu = Menu.getApplicationMenu();
 
-console.log("defaultMenu native menu", defaultMenu);
-
-const customMenu = [
-  {
-    label: "Apps",
-  },
-];
-const menu = Menu.buildFromTemplate(customMenu);
-Menu.setApplicationMenu(menu);
+// const customMenu = [
+//   {
+//     label: "Apps",
+//   },
+// ];
+// const menu = Menu.buildFromTemplate(customMenu);
+// Menu.setApplicationMenu(menu);
 
 if (isProd) {
   serve({ directory: "app" });
 } else {
+  log("Running development mode.", "info");
   app.setPath("userData", `${app.getPath("userData")} (development)`);
 }
 
 (async () => {
+  await loadModules();
   await app.whenReady();
 
-  console.log(":*:Starting application:*:");
+  log(":*:Starting application:*:");
 
   // Setup Window
   const mainWindow = createWindow("main", {
     width: 1000,
     height: 1000,
   });
+
   if (isProd) {
     await mainWindow.loadURL("app://./index.html");
   } else {
     const port = process.argv[2];
-    console.log("Server URL: ", port);
     await mainWindow.loadURL(`http://localhost:${port}/`);
-    console.log("port", port);
     mainWindow.webContents.openDevTools();
   }
 
   // IPC Handlers
-  // Listen for messages from the renderer process
-  ipcMain.on("message", (event, arg) => {
-    console.log(`Received message from renderer process: ${arg}`);
-
-    // Send a response back to the renderer process
-    event.sender.send("message:client", "Hello from the main process!");
-  });
-
-  // TODO build a plugin interface for registering ipc listeners
-
-  // The TODO Plugin
-  ipcMain.on("todo:get", (event, message) => {
-    console.log("todo:get message:", message);
-    if (!message.userId) {
-      console.log("error: no user id passed to TODO listener");
-      event.sender.send("error", {
-        type: "storeGet",
-        message: "missing userId",
-        requestLogin: true,
-      });
-      return;
-    }
-    console.log("got userid");
-    const todos = readStore("todo", message.userId);
-    console.log("todos", todos);
-    event.sender.send("todo:client", todos);
-  });
-
-  ipcMain.on("todo:add",async (event, message) => {
-    console.log("test::message", message);
-    console.log(typeof message);
-    if (!message.userId) {
-      console.log("error: no user id passed to TODO listener");
-      event.sender.send("error", {
-        type: "storeUpdate",
-        message: "missing userId",
-        requestLogin: true,
-      });
-      return;
-    }
-    console.log("got userid");
-    const result = await updateDataStore("todo", message.userId, message);
-    console.log('updateDataStore result:', result);
-    event.sender.send('todo:client', result?.data);
-  });
-
+  // Register Event Subscribers;
+  for (const subscriber of subscribers) {
+    log(subscriber, 'info');
+    log(`Subscribing:, ${subscriber?.channel}`, "info");
+    ipcMain.on(subscriber.channel, subscriber.callback);
+  }
 })();
 
 app.on("window-all-closed", () => {
   app.quit();
 });
-
