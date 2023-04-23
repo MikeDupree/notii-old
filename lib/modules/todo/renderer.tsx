@@ -13,6 +13,7 @@ import { ipcHandler } from "../../../renderer/src/ipc";
 import { ipcRenderer } from "electron";
 
 export default function Todo({ test }) {
+   console.log('TODO', ipcRenderer);
   const [todos, setTodos] = useState([]);
   const session = useSession();
   const socket = ipcHandler("todo");
@@ -68,7 +69,7 @@ export default function Todo({ test }) {
   };
 
   return (
-    <>
+    <div>
       <Container maxWidth="lg">
         <Box
           sx={{
@@ -124,6 +125,6 @@ export default function Todo({ test }) {
           </List>
         </Box>
       </Container>
-    </>
+    </div>
   );
 }

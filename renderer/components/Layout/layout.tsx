@@ -1,4 +1,5 @@
-import React, { useState, ReactNode } from "react";
+import React, { useState, ReactNode, useEffect } from "react";
+import Link from "next/link";
 import AppBar from "@mui/material/AppBar";
 import Box from "@mui/material/Box";
 import CssBaseline from "@mui/material/CssBaseline";
@@ -34,13 +35,44 @@ interface Props {
 export default function Layout(props: Props) {
   const { window, children } = props;
 
-  const [modulesEnabled, setModulesEnabled] = useState([]);
-  const modulesSocket = ipcHandler("modules");
+  // Modules
+  /*
+   * 
+    [
+      {
+          "name": "Tasks",
+          "url": "/tasks",
+          "renderer": "todo"
+      }
+    ]
+  */
+  interface Module {
+    name: string;
+    url: string;
+    renderer: string;
+  }
+  const socket = ipcHandler("modules");
+  const [modulesEnabled, setModulesEnabled] = useState<Module[]>([]);
   const handleGetModules = (event, message) => {
+    console.log("event", event);
+    console.log("message", message);
     setModulesEnabled(message);
   };
-  ipcRenderer.addListener("modules:client", handleGetModules);
+  console.log(ipcRenderer);
+  if (ipcRenderer) {
+    console.log("addListener :: modules");
+    ipcRenderer.addListener("modules:client", handleGetModules);
+  }
+  useEffect(() => {
+    //request todo data for user.
+    // emit this when first mounting to get current todos
+    socket.send({ channelOverride: "modules" });
 
+    return () => {
+      // ipcRenderer.removeListener("todo:client", handleTodoUpdate);
+    };
+  }, []);
+  // --- Modules
   const [mobileOpen, setMobileOpen] = React.useState(false);
 
   const handleDrawerToggle = () => {
@@ -67,12 +99,14 @@ export default function Layout(props: Props) {
       <List>
         {modulesEnabled.map((module, index) => (
           <ListItem key={module.name} disablePadding>
-            <ListItemButton>
-              <ListItemIcon>
-                {index % 2 === 0 ? <InboxIcon /> : <MailIcon />}
-              </ListItemIcon>
-              <ListItemText primary={module.name} />
-            </ListItemButton>
+            <Link href={module.url}>
+              <ListItemButton>
+                <ListItemIcon>
+                  {index % 2 === 0 ? <InboxIcon /> : <MailIcon />}
+                </ListItemIcon>
+                <ListItemText primary={module.name} />
+              </ListItemButton>
+            </Link>
           </ListItem>
         ))}
       </List>
@@ -107,7 +141,6 @@ export default function Layout(props: Props) {
           </Typography>
           <AccountMenu />
         </Toolbar>
-
       </AppBar>
       <Box
         component="nav"
