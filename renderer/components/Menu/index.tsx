@@ -162,13 +162,6 @@ export default function Menu() {
         <Link href="/">
           <Typography sx={{ minWidth: 100 }}>Dashboard</Typography>
         </Link>
-        <>
-          {modulesEnabled.map((module) => (
-            <Link href={module.url}>
-              <Typography sx={{ minWidth: 100 }}>{module.name}</Typography>
-            </Link>
-          ))}
-        </>
         <div style={{ flexGrow: 1 }} />
         <AccountMenu />
       </Box>

@@ -96,6 +96,9 @@ export default NextAuth({
      */
     async session(params) {
       const { session, token, user } = params;
+      console.log('session', session);
+      console.log('token', token);
+      console.log('user', user);
       // TODO Add proper validation for fields on token.token
       // type is unknown
       const authType = userAccount?.provider;
@@ -120,7 +123,8 @@ export default NextAuth({
      *  JWT Callback
      */
     async jwt(data) {
-      return data.token;
+      console.log('data', data);
+      return {...data.token, ...data?.account};
     },
   },
 

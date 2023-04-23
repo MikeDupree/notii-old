@@ -4,30 +4,11 @@ import Container from "@mui/material/Container";
 import Typography from "@mui/material/Typography";
 import Box from "@mui/material/Box";
 import { ThreeDBox } from "../components/3DBox";
-
-import { ipcHandler } from "../src/ipc";
-import { ipcRenderer } from "electron";
+import { Button } from "@mui/material";
+import { useSession, signIn, signOut } from "next-auth/react"
 
 export default function Home({ test }) {
 
-  const socket = ipcHandler("modules");
-
-  const handleTodoUpdate = (event, message) => {
-    console.log(`TODO socket message`);
-    console.log(message);
-  };
-  ipcRenderer.addListener("modules:client", handleTodoUpdate);
-  useEffect(() => {
-    //request todo data for user.
-    // emit this when first mounting to get current todos
-    socket.send(
-      { channelOverride: "modules" }
-    );
-
-    return () => {
-      // ipcRenderer.removeListener("todo:client", handleTodoUpdate);
-    };
-  }, []);
   return (
     <>
       <Container maxWidth="lg">
@@ -51,7 +32,7 @@ export default function Home({ test }) {
             <ThreeDBox position={[1.2, 0, 0]} />
           </Canvas>
 
-          <iframe src="https://mail.google.com/" />
+          <Button onClick={() => signIn()}> Gmail </Button>
         </Box>
       </Container>
     </>

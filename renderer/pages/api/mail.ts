@@ -22,19 +22,16 @@ session {
     jti: 'fd67e644-742a-4311-9dd1-6d5e31f312a5'
   }
 */
-  console.log("session", session);
-  console.log("session.token.token.token", session.token.token.token);
-  console.log("account", session.token.token.account);
   if (!session) {
     res.status(401);
   }
 
   const clientId = process.env.GOOGLE_CLIENT_ID;
   const clientSecret = process.env.GOOGLE_CLIENT_SECRET;
-  const accessToken = session?.token?.token?.account?.access_token;
-  const refreshToken = session?.token?.token?.account?.refresh_token;
+  const accessToken = session?.user?.access_token;
+  const refreshToken = session?.user?.refresh_token;
 
-  console.log({
+  console.log('mail args', {
     clientId,
     clientSecret,
     accessToken,

@@ -13,6 +13,7 @@ const updateStore = async (
     return;
   }
   const result = await updateDataStore("todo", userId, store?.data, config);
+  console.log('Sending message on todo:client');
   event.sender.send("todo:client", store?.data);
 };
 
@@ -26,6 +27,7 @@ const getHandler = (event, message) => {
     return;
   }
   const todos = readStore("todo", message.userId);
+  console.log('Sending message on todo:client');
   event.sender.send("todo:client", todos);
 };
 
@@ -43,6 +45,8 @@ const createHandler = async (event, message) => {
     });
     return;
   }
+
+  console.log('Sending message on todo:client');
   const result = await updateDataStore("todo", message.userId, message);
   event.sender.send("todo:client", result?.data);
 };

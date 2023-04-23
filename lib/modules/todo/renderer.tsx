@@ -25,6 +25,7 @@ export default function Todo({ test }) {
       setTodos(message.data);
     }
   };
+  console.log('regiserting handleTodoUpdate', ipcRenderer);
   ipcRenderer.addListener("todo:client", handleTodoUpdate);
 
   useEffect(() => {

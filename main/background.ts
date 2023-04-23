@@ -23,7 +23,6 @@ const defaultSubscribers = [
       event.sender.send("modules:client", moduleConfigs);
     },
   },
-  ,
 ];
 
 let subscribers = [...defaultSubscribers];
@@ -113,6 +112,7 @@ if (isProd) {
   // IPC Handlers
   // Register Event Subscribers;
   for (const subscriber of subscribers) {
+    log(subscriber, 'info');
     log(`Subscribing:, ${subscriber?.channel}`, "info");
     ipcMain.on(subscriber.channel, subscriber.callback);
   }

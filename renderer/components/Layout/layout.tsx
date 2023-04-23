@@ -17,6 +17,7 @@ import MenuIcon from "@mui/icons-material/Menu";
 import Toolbar from "@mui/material/Toolbar";
 import Typography from "@mui/material/Typography";
 
+import { useModules } from "../../hooks/modules";
 import { AccountMenu } from "../Menu";
 import { ipcHandler } from "../../src/ipc";
 import { ipcRenderer } from "electron";
@@ -34,45 +35,7 @@ interface Props {
 
 export default function Layout(props: Props) {
   const { window, children } = props;
-
-  // Modules
-  /*
-   * 
-    [
-      {
-          "name": "Tasks",
-          "url": "/tasks",
-          "renderer": "todo"
-      }
-    ]
-  */
-  interface Module {
-    name: string;
-    url: string;
-    renderer: string;
-  }
-  const socket = ipcHandler("modules");
-  const [modulesEnabled, setModulesEnabled] = useState<Module[]>([]);
-  const handleGetModules = (event, message) => {
-    console.log("event", event);
-    console.log("message", message);
-    setModulesEnabled(message);
-  };
-  console.log(ipcRenderer);
-  if (ipcRenderer) {
-    console.log("addListener :: modules");
-    ipcRenderer.addListener("modules:client", handleGetModules);
-  }
-  useEffect(() => {
-    //request todo data for user.
-    // emit this when first mounting to get current todos
-    socket.send({ channelOverride: "modules" });
-
-    return () => {
-      // ipcRenderer.removeListener("todo:client", handleTodoUpdate);
-    };
-  }, []);
-  // --- Modules
+  const { modules } = useModules();
   const [mobileOpen, setMobileOpen] = React.useState(false);
 
   const handleDrawerToggle = () => {
@@ -86,18 +49,20 @@ export default function Layout(props: Props) {
       <List>
         {["Mail", "Calendar"].map((text, index) => (
           <ListItem key={text} disablePadding>
-            <ListItemButton>
-              <ListItemIcon>
-                {index % 2 === 0 ? <InboxIcon /> : <MailIcon />}
-              </ListItemIcon>
-              <ListItemText primary={text} />
-            </ListItemButton>
+            <Link href={`/${text.toLowerCase()}`}>
+              <ListItemButton>
+                <ListItemIcon>
+                  {index % 2 === 0 ? <InboxIcon /> : <MailIcon />}
+                </ListItemIcon>
+                <ListItemText primary={text} />
+              </ListItemButton>
+            </Link>
           </ListItem>
         ))}
       </List>
       <Divider />
       <List>
-        {modulesEnabled.map((module, index) => (
+        {modules.map((module, index) => (
           <ListItem key={module.name} disablePadding>
             <Link href={module.url}>
               <ListItemButton>
@@ -136,9 +101,11 @@ export default function Layout(props: Props) {
           >
             <MenuIcon />
           </IconButton>
-          <Typography variant="h6" noWrap component="div">
-            Notii
-          </Typography>
+          <Link href={"/"}>
+            <Typography variant="h6" noWrap component="div">
+              Notii
+            </Typography>
+          </Link>
           <AccountMenu />
         </Toolbar>
       </AppBar>
