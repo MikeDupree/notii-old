@@ -1,0 +1,7 @@
+# Compiled files
+target/
+
+# Rust/Cargo specific files
+Cargo.lock
+Cargo.toml.orig
+*.rs.bk
