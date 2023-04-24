@@ -3,6 +3,7 @@ import serve from "electron-serve";
 import fs from "fs";
 import chalk from "chalk";
 import { createWindow } from "./helpers";
+import axios from "axios";
 
 let moduleConfigs = [];
 
@@ -95,6 +96,14 @@ if (isProd) {
 
   log(":*:Starting application:*:");
 
+  axios
+    .get("http://localhost:8080/files?path=/home/mdupree")
+    .then((res) => {
+      console.log(res.data);
+    })
+    .catch((e) => {
+      console.log(e);
+    });
   // Setup Window
   const mainWindow = createWindow("main", {
     width: 1000,
@@ -112,7 +121,7 @@ if (isProd) {
   // IPC Handlers
   // Register Event Subscribers;
   for (const subscriber of subscribers) {
-    log(subscriber, 'info');
+    log(subscriber, "info");
     log(`Subscribing:, ${subscriber?.channel}`, "info");
     ipcMain.on(subscriber.channel, subscriber.callback);
   }
