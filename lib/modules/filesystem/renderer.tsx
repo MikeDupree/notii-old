@@ -3,6 +3,7 @@ import React, { useEffect, useState } from "react";
 import { Box } from "@mui/material";
 import FileList from "./components/FileList";
 import TextInput from "./components/TextInput";
+import Checkbox from "./components/Checkbox";
 
 type Props = {};
 
@@ -20,11 +21,16 @@ const FileExplorer = (props: Props) => {
         console.log(e);
       });
   }, []);
+
   console.log("files", files);
+
   return (
-    <div class="h-screen w-screen bg-gray-100">
+    <div className="h-screen w-screen">
       <Box>
-        <TextInput />
+        <div className="flex">
+          <TextInput />
+          <Checkbox label="show hidden" />
+        </div>
       </Box>
       <FileList files={files} />
     </div>

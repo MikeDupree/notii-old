@@ -88,14 +88,14 @@ export default function FileList({ files }: { files: File[] }) {
   const [showHidden, setShowHidden] = useState(false);
 
   return (
-    <div class="h-screen w-screen bg-gray-100">
+    <div class="h-screen w-screen">
       <TreeView
         aria-label="customized"
         defaultExpanded={["1"]}
         defaultCollapseIcon={<MinusSquare />}
         defaultExpandIcon={<PlusSquare />}
         defaultEndIcon={<CloseSquare />}
-        sx={{ height: 264, flexGrow: 1, maxWidth: 400, overflowY: "auto" }}
+        sx={{ height: 264, flexGrow: 1, maxWidth: 600, overflowY: "auto" }}
       >
         {files.map((file) => {
           if (file.hidden && !showHidden) {
@@ -103,8 +103,13 @@ export default function FileList({ files }: { files: File[] }) {
           }
 
           return (
-            <StyledTreeItem key={file.filepath} nodeId="1" label={file.filename}>
-              {file?.children && file.children.map((child) => <StyledTreeItem />)}
+            <StyledTreeItem
+              key={file.filepath}
+              nodeId="1"
+              label={file.filename}
+            >
+              {file?.children &&
+                file.children.map((child) => <StyledTreeItem />)}
             </StyledTreeItem>
           );
         })}
