@@ -1,27 +1,17 @@
+use actix_cors::Cors;
+use actix_web::middleware::Logger;
 use actix_web::{get, web, App, HttpResponse, HttpServer, Responder};
-use serde::Deserialize;
-use serde_json::{json, Map, Value};
+use env_logger;
+use serde::Serialize;
 use std::fs;
 
-fn toFileJson(name: String) -> String {
-    // Create an empty JSON object
-    let mut object = Map::new();
-
-    // Add key-value pairs to the object
-    object.insert("name".to_string(), Value::String(name));
-    object.insert(
-        "Number Ex".to_string(),
-        Value::Number(serde_json::Number::from(30)),
-    );
-    object.insert("Boolean Ex".to_string(), Value::Bool(true));
-
-    // Serialize the object to a JSON string
-    json!(object).to_string()
-}
-
-fn toJsonArray(data: Vec<String>) -> String {
-    // Serialize the vector to a JSON string
-    json!(data).to_string()
+#[derive(Serialize)]
+struct FileData {
+    filename: String,
+    filepath: String,
+    hidden: bool,
+    is_dir: bool,
+    is_symlink: bool,
 }
 
 #[get("/")]
@@ -34,20 +24,41 @@ pub struct FilesystemQueryParams {
     path: String,
 }
 
-#[get("/files")]
+#[derive(Serialize)]
+struct ResponseData {
+    success: bool,
+    data: Vec<FileData>,
+    error: String,
+}
+
+#[get("/data")]
 async fn filesystem(query: web::Query<FilesystemQueryParams>) -> impl Responder {
     let path = &query.path;
-    println!("/files :: received q? :: {}", path.to_string());
+    println!("/data :: received q? :: {}", path.to_string());
 
     let mut error = String::new();
     let mut success = true;
-    let mut files: Vec<String> = vec![];
+    let mut data: Vec<FileData> = vec![];
     if let Ok(entries) = fs::read_dir(path) {
         for entry in entries {
             if let Ok(entry) = entry {
+                let mut filename = String::new();
                 if let Some(name) = entry.file_name().to_str() {
-                    files.push(toFileJson(name.to_string()))
+                    filename = name.to_string();
                 }
+                let mut filepath = String::new();
+                if let Some(path) = entry.path().to_str() {
+                    filepath = path.to_string();
+                }
+                let is_hidden_file = filename.starts_with(".");
+
+                data.push(FileData {
+                    filename,
+                    filepath,
+                    hidden: is_hidden_file,
+                    is_dir: entry.file_type().unwrap().is_dir(),
+                    is_symlink: entry.file_type().unwrap().is_symlink(),
+                });
             }
         }
     } else {
@@ -55,18 +66,41 @@ async fn filesystem(query: web::Query<FilesystemQueryParams>) -> impl Responder 
         error.push_str(format!("Failed to read directory").as_str());
     }
 
-    let mut response = Map::new();
-    response.insert("data".to_string(), Value::String(json!(files).to_string()));
-    response.insert("success".to_string(), Value::Bool(success));
-    response.insert("error".to_string(), Value::String(error));
-
-    HttpResponse::Ok().body(json!(response).to_string())
+    let response_data = ResponseData {
+        success,
+        data,
+        error,
+    };
+    let response_json = serde_json::to_string(&response_data).unwrap();
+    HttpResponse::Ok()
+        .content_type("application/json")
+        .body(response_json)
 }
 
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
-    HttpServer::new(|| App::new().service(hello).service(filesystem))
-        .bind("127.0.0.1:8080")?
-        .run()
-        .await
+    println!("starting server on port: {}", "8080");
+    env_logger::init();
+
+    HttpServer::new(|| {
+        // TODO we need to make these secure
+        // this is for DEVELOPMENT only
+        let cors = Cors::default()
+            .allow_any_origin()
+            .allowed_headers(vec![
+                "Authorization",
+                "Accept",
+                "Access-Control-Allow-Origin",
+            ])
+            .allowed_methods(vec!["GET", "POST"])
+            .max_age(3600);
+        App::new()
+            .wrap(cors)
+            .wrap(Logger::default())
+            .service(hello)
+            .service(filesystem)
+    })
+    .bind("127.0.0.1:8080")?
+    .run()
+    .await
 }

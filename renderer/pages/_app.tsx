@@ -10,6 +10,7 @@ import { ModulesProvider } from "../hooks/modules";
 import Layout from "../components/Layout/layout";
 import "../theme/tailwind.css";
 import "../theme/dist/output.css";
+import "../theme/global.css";
 
 // Client-side cache, shared for the whole session of the user in the browser.
 const clientSideEmotionCache = createEmotionCache();
