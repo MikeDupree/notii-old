@@ -1,13 +1,13 @@
 import React, { useEffect, useState } from "react";
 import Diff from "./components/diffViewer";
-
+import SelectGitRepo from "./components/selectRepo";
 import { ipcHandler } from "../../../renderer/src/ipc";
 import { ipcRenderer } from "electron";
 
 type Props = {};
 
 const renderer = (props: Props) => {
-
+ const [selectedRepo, setSelectedRepo] = useState<string>();
   const [file, setFile] = useState<{src: string, cmp: string} | undefined>();
   const socket = ipcHandler("git");
   const handleGitMessage = (event, message) => {
@@ -42,6 +42,8 @@ const renderer = (props: Props) => {
   return (
     <div>
       Git Diff
+      <SelectGitRepo /> 
+
       <Diff file={file} />
     </div>
   );
