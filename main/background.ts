@@ -42,8 +42,14 @@ const loadModules = async () => {
     let module = await import(`../lib/modules/${modulePath}`);
     console.log("module", module);
     console.log("config", module?.config);
+    if (!module.config) {
+      continue;
+    }
+
     // Handle module subscribers
-    subscribers = [...subscribers, ...module?.subscribers];
+    if (module?.subscribers?.length > 0) {
+      subscribers = [...subscribers, ...module?.subscribers];
+    }
     moduleConfigs = [...moduleConfigs, module?.config];
   }
 };
