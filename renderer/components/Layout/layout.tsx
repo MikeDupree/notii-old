@@ -19,8 +19,6 @@ import Typography from "@mui/material/Typography";
 
 import { useModules } from "../../hooks/modules";
 import { AccountMenu } from "../Menu";
-import { ipcHandler } from "../../src/ipc";
-import { ipcRenderer } from "electron";
 
 const drawerWidth = 240;
 
@@ -150,14 +148,11 @@ export default function Layout(props: Props) {
       <Box
         component="main"
         sx={{
-          flexGrow: 1,
-          p: 3,
           width: { sm: `calc(100% - ${drawerWidth}px)` },
         }}
       >
         <Toolbar />
-
-        {children}
+        <div class="main">{children}</div>
       </Box>
     </Box>
   );
