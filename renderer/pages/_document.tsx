@@ -18,13 +18,13 @@ interface MyDocumentProps extends DocumentProps {
 
 export default function MyDocument({ emotionStyleTags }: MyDocumentProps) {
   return (
-    <Html lang="en" className="Notii-App">
+    <Html lang="en" className="Notii-App scrollbar">
       <Head>
         <link rel="shortcut icon" href="/favicon.ico" />
         <meta name="emotion-insertion-point" content="" />
         {emotionStyleTags}
       </Head>
-      <body>
+      <body className="">
         <Main />
         <NextScript />
       </body>

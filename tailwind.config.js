@@ -2,7 +2,8 @@
 module.exports = {
   content: ["./renderer/**/*.{tsx,ts,jsx,js}"],
   theme: {
-    extend: {},
+    extend: {
+    },
   },
-  plugins: [],
+  plugins: [require("tailwind-scrollbar")],
 };

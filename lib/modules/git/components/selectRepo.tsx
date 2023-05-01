@@ -8,9 +8,9 @@ const SelectGitRepo = () => {
   };
 
   return (
-    <div className="w-full h-20 bg-gray-200 flex justify-center items-center">
+    <div className="w-full h-20 flex justify-center items-center">
       <button
-        className="bg-white rounded-lg p-4 flex items-center hover:bg-gray-100"
+        className="rounded-lg p-4 flex items-center hover:bg-opacity-70"
         onClick={openDialog}
       >
         <svg

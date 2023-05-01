@@ -38,10 +38,7 @@ const modulesLocation = "./lib/modules";
 const modulePaths = fs.readdirSync(modulesLocation);
 const loadModules = async () => {
   for (const modulePath of modulePaths) {
-    console.log("module path", modulePath);
     let module = await import(`../lib/modules/${modulePath}`);
-    console.log("module", module);
-    console.log("config", module?.config);
     if (!module.config) {
       continue;
     }
@@ -102,14 +99,6 @@ if (isProd) {
 
   log(":*:Starting application:*:");
 
-  axios
-    .get("http://localhost:8080/files?path=/home/mdupree")
-    .then((res) => {
-      console.log(res.data);
-    })
-    .catch((e) => {
-      console.log(e);
-    });
   // Setup Window
   const mainWindow = createWindow("main", {
     width: 1000,
