@@ -67,21 +67,22 @@ export default function Layout(props: Props) {
       </List>
       <Divider />
       <List>
-        {!!settings && modules.map((module, index) => {
-          if (!settings.modules?.[module.name.toLowerCase()]) return null;
-          return (
-            <ListItem key={module.name} disablePadding>
-              <Link href={module.url}>
-                <ListItemButton>
-                  <ListItemIcon>
-                    {index % 2 === 0 ? <InboxIcon /> : <MailIcon />}
-                  </ListItemIcon>
-                  <ListItemText primary={module.name} />
-                </ListItemButton>
-              </Link>
-            </ListItem>
-          );
-        })}
+        {!!settings &&
+          modules.map((module, index) => {
+            if (!settings.modules?.[module.name.toLowerCase()]) return null;
+            return (
+              <ListItem key={module.name} disablePadding>
+                <Link href={module.url}>
+                  <ListItemButton>
+                    <ListItemIcon>
+                      {index % 2 === 0 ? <InboxIcon /> : <MailIcon />}
+                    </ListItemIcon>
+                    <ListItemText primary={module.name} />
+                  </ListItemButton>
+                </Link>
+              </ListItem>
+            );
+          })}
       </List>
     </div>
   );

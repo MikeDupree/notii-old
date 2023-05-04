@@ -5,7 +5,7 @@ import { useSettings } from "../hooks/settings";
 // Create a theme instance.
 export const theme = createTheme({
   palette: {
-    mode: "dark",
+    mode: "light",
     primary: {
       main: "#556cd6",
     },
