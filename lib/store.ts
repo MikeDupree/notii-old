@@ -108,7 +108,7 @@ export const overwriteDataStore = async (
     message: "Store sucess",
     data: null,
   };
-
+  console.log('overwriteDataStore', {storeName, userId, store});
   let storeFilePath = `${userId}.${storeName}.json`;
 
   const writer = promisify(fs.writeFile);

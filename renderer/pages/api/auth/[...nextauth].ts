@@ -18,13 +18,13 @@ let userAccount;
 export default NextAuth({
   // https://next-auth.js.org/configuration/providers
   providers: [
-    // GithubProvider({
-    //   clientId: process.env.GITHUB_ID,
-    //   clientSecret: process.env.GITHUB_SECRET,
-    //   // https://docs.github.com/en/developers/apps/building-oauth-apps/scopes-for-oauth-apps
-    //   // @ts-ignore
-    //   scope: "read:user",
-    // }),
+    GithubProvider({
+      clientId: process.env.GITHUB_CLIENT_ID,
+      clientSecret: process.env.GITHUB_CLIENT_SECRET,
+      // https://docs.github.com/en/developers/apps/building-oauth-apps/scopes-for-oauth-apps
+      // @ts-ignore
+      scope: "read:user",
+    }),
     GoogleProvider({
       clientId: process.env.GOOGLE_CLIENT_ID,
       clientSecret: process.env.GOOGLE_CLIENT_SECRET,
@@ -133,5 +133,5 @@ export default NextAuth({
   events: {},
 
   // Enable debug messages in the console if you are having problems
-  debug: false,
+  debug: true
 });

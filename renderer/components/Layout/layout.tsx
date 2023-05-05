@@ -49,8 +49,11 @@ export default function Layout(props: Props) {
 
   const drawer = (
     <div>
+      1
       <Toolbar />
+      <AccountMenu />
       <Divider />
+
       <List>
         {["Mail", "Calendar"].map((text, index) => (
           <ListItem key={text} disablePadding>
