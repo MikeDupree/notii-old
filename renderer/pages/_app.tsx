@@ -12,6 +12,8 @@ import "../theme/tailwind.css";
 import "../theme/dist/output.css";
 import "../theme/global.css";
 
+// TODO Download these and place them in editor module.
+import 'react-quill/dist/quill.snow.css';
 // Client-side cache, shared for the whole session of the user in the browser.
 const clientSideEmotionCache = createEmotionCache();
 

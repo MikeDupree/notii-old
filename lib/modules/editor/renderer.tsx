@@ -1,15 +1,14 @@
 import React, { useRef } from "react";
-import { Editor } from "@tinymce/tinymce-react";
-import { Editable, useEditor } from '@wysimark/react';
+import Editor from "./components/Editor";
 
 type Props = {};
 
 const renderer = (props: Props) => {
-  const editor = useEditor({
-    initialMarkdown: "# Notii\n\nGet started writing your notes!",
-    height: 350
-  })
-  return <Editable editor={editor} />
+  return (
+    <div>
+      <Editor />
+    </div>
+  );
 };
 
 export default renderer;
