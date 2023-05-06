@@ -4,13 +4,16 @@ import Editor from "./components/Editor";
 import { ipcHandler } from "../../../renderer/src/ipc";
 import { ipcRenderer } from "electron";
 import FileList from "./components/FileList";
+import { useSession } from "next-auth/react";
 
 type Props = {};
 
 const renderer = (props: Props) => {
+  const session = useSession();
   const [selected, setSelected] = useState<string>();
   const [contents, setContents] = useState<string>("");
   const socket = ipcHandler("editor");
+
   const handleTodoUpdate = (event, message) => {
     console.log(`Editor socket message`);
     console.log(message);
@@ -34,23 +37,19 @@ const renderer = (props: Props) => {
   const onChangeHandler = (contents: string) => {
     console.log("contents", contents);
     socket.send(
-      { filename: "untitled", contents },
+      {
+        userId: session?.data?.user?.sub,
+        filename: "untitled",
+        contents,
+      },
       { channelOverride: "editor:update" }
     );
   };
 
-  if (false && !selected) {
-    return (
-      <div>
-        <FileList />
-      </div>
-    );
-  }
-
   return (
     <div>
       <Editor onChange={onChangeHandler} />
-        <FileList />
+      <FileList />
     </div>
   );
 };

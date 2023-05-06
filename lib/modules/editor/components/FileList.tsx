@@ -6,19 +6,21 @@ import ListItemText from "@mui/material/ListItemText";
 
 import { ipcHandler } from "../../../../renderer/src/ipc";
 import { ipcRenderer } from "electron";
+import { useSession } from "next-auth/react";
 
 interface ListChildComponentProps {
+  file: { name: string; filename: string; fullpath: string };
   index: string;
   style?: any;
 }
 
 function RenderRow(props: ListChildComponentProps) {
-  const { index, style } = props;
+  const { file, index, style } = props;
 
   return (
     <ListItem style={style} key={index} component="div" disablePadding>
       <ListItemButton>
-        <ListItemText primary={`Item ${index + 1}`} />
+        <ListItemText primary={file.name} />
       </ListItemButton>
     </ListItem>
   );
@@ -29,23 +31,24 @@ interface Props {
 }
 
 export default function FileList({ onSelect }: Props) {
+  const session = useSession();
   const [files, setFiles] = useState<string[]>([]);
   const socket = ipcHandler("editor");
   const handleFilesGet = (event, message) => {
-    console.log(`Editor socket message`);
-    console.log(message);
     if (message && message.data) {
       console.log("set files", message.data);
       setFiles(message.data);
     }
   };
-  console.log("regiserting handleFilesGet", ipcRenderer);
   ipcRenderer.addListener("editor:client", handleFilesGet);
 
   useEffect(() => {
     //request editor data for user.
     // emit this when first mounting to get current contents
-    socket.send({ }, { channelOverride: "editor:getFiles" });
+    socket.send(
+      { userId: session?.data?.user?.sub },
+      { channelOverride: "editor:getFiles" }
+    );
 
     return () => {
       // ipcRenderer.removeListener("editor:client", handleFilesGet);
@@ -60,7 +63,9 @@ export default function FileList({ onSelect }: Props) {
         bgcolor: "background.paper",
       }}
     >
-      <RenderRow index="1" />
+      {files.map((file) => (
+        <RenderRow index={file.name} file={file} />
+      ))}
     </Box>
   );
 }
