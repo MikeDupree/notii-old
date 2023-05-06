@@ -12,14 +12,15 @@ interface ListChildComponentProps {
   file: { name: string; filename: string; fullpath: string };
   index: string;
   style?: any;
+  onClick: (filename: string) => void;
 }
 
-function RenderRow(props: ListChildComponentProps) {
-  const { file, index, style } = props;
+function RenderFileItem(props: ListChildComponentProps) {
+  const { file, index, style, onClick } = props;
 
   return (
     <ListItem style={style} key={index} component="div" disablePadding>
-      <ListItemButton>
+      <ListItemButton onClick={() => onClick(file.name)}>
         <ListItemText primary={file.name} />
       </ListItemButton>
     </ListItem>
@@ -32,15 +33,22 @@ interface Props {
 
 export default function FileList({ onSelect }: Props) {
   const session = useSession();
-  const [files, setFiles] = useState<string[]>([]);
+  const [files, setFiles] = useState<
+    { name: string; filename: string; fullpath: string }[]
+  >([]);
   const socket = ipcHandler("editor");
-  const handleFilesGet = (event, message) => {
-    if (message && message.data) {
-      console.log("set files", message.data);
+
+  const filesGetHandler = (event, message) => {
+    if (message.type === "files:get") {
       setFiles(message.data);
     }
   };
-  ipcRenderer.addListener("editor:client", handleFilesGet);
+  ipcRenderer.addListener("editor:getFiles", filesGetHandler);
+
+  const onFileClickHandler = (filename) => {
+    console.log("onFileClickHandler", filename);
+    onSelect?.(filename);
+  };
 
   useEffect(() => {
     //request editor data for user.
@@ -51,7 +59,7 @@ export default function FileList({ onSelect }: Props) {
     );
 
     return () => {
-      // ipcRenderer.removeListener("editor:client", handleFilesGet);
+      // ipcRenderer.removeListener("editor:client", filesGetHandler);
     };
   }, []);
   return (
@@ -64,7 +72,11 @@ export default function FileList({ onSelect }: Props) {
       }}
     >
       {files.map((file) => (
-        <RenderRow index={file.name} file={file} />
+        <RenderFileItem
+          index={file.name}
+          file={file}
+          onClick={onFileClickHandler}
+        />
       ))}
     </Box>
   );

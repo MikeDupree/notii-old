@@ -31,8 +31,6 @@ const getRoute = (id: string, user: any) => {
 export const AccountMenu = () => {
   const session = useSession();
   const router = useRouter();
-  console.log("session", session);
-  console.log("router", router);
 
   const handleClick = (event: MouseEvent<HTMLElement>) => {
     setAnchorEl(event.currentTarget);

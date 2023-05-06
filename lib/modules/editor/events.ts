@@ -36,21 +36,9 @@ const overwriteDataStore = async (
     message: "Store sucess",
     data: null,
   };
-  console.log("overwriteDataStore", { storeName, userId, store });
   let storeFilePath = `${userId}/${filename}.${storeName}.json`;
   const file = `${getStorePath()}/${storeFilePath}`;
-  // ensureDirectoryExistence(file);
-  // fs.writeFile(
-  //   file,
-  //   JSON.stringify(store),
-  //   (err) => {
-  //     console.log(err ? "Error writing file" : "Success! File saved", err);
-  //   }
-  // );
 
-  console.log("_dirname;", __dirname);
-  console.log("pwd;", process.cwd());
-  console.log("outputFile;", file);
   outputFile(file, JSON.stringify(store))
     .then(() => {
       console.log("The file has been saved!");
@@ -91,15 +79,6 @@ const readStore = (storeName: string, userId: string, filename: string) => {
 /*
  * Handlers
  */
-const updateStore = async (
-  event: IpcMainEvent,
-  userId: string,
-  filename: string,
-  store: Record<string, unknown>,
-  config?: { force: boolean }
-) => {
-  await overwriteDataStore("editor", userId, filename, store);
-};
 
 const getHandler = (event, { userId, filename }) => {
   if (!filename) {
@@ -117,8 +96,8 @@ const getHandler = (event, { userId, filename }) => {
     return;
   }
   const content = readStore("editor", userId, filename);
-  console.log("Sending message on editor:client");
-  event.sender.send("editor:client", content);
+  console.log("Sending message on readStore() editor:client");
+  event.sender.send("editor:getFile", {type: 'file:get', data: content});
 };
 
 const getSubscriber = {
@@ -152,8 +131,8 @@ const updateHandler = async (event, message) => {
 
   const store = { name: filename, author: userId, data: contents };
   await overwriteDataStore("editor", userId, filename, store);
-  console.log("Sending message on editor:client");
-  event.sender.send("editor:client", message.content);
+  console.log("Sending message on updateHandler() editor:client");
+  event.sender.send("editor:updateFile", {type: 'file:update', data: message.content});
 };
 
 const updateSubscriber = {
@@ -177,7 +156,9 @@ const getFilesHandler = async (event, { userId }) => {
     filename: file,
     fullpath: `${process.cwd()}/store/notes/${userId}/${file}`,
   }));
-  event.sender.send("editor:client", {type: 'files', data: result});
+
+  console.log('sending message on getFilesHandler() editor:client');
+  event.sender.send("editor:getFiles", {type: 'files:get', data: result});
 };
 
 const getFilesSubscriber = {

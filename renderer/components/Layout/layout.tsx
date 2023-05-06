@@ -49,9 +49,7 @@ export default function Layout(props: Props) {
 
   const drawer = (
     <div>
-      1
       <Toolbar />
-      <AccountMenu />
       <Divider />
 
       <List>
