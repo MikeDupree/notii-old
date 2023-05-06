@@ -1,9 +1,10 @@
-import { useEffect, useState, createContext } from "react";
+import { useEffect, useState, createContext, ReactNode } from "react";
 import { ipcHandler } from "../src/ipc";
 import { ipcRenderer } from "electron";
 
 export interface Module {
-  name: string;
+ name: string;
+ icon?: ReactNode;
   url: string;
   renderer: string;
 }

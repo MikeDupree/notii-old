@@ -25,11 +25,16 @@ const getStorePath = () => {
   return "./store/notes/";
 };
 
+interface WriteOptions {
+  oldFilename?: string;
+}
+
 const overwriteDataStore = async (
   storeName: string,
   userId: string,
   filename: string,
-  store: Record<string, unknown>
+  store: Record<string, unknown>,
+  options?: WriteOptions
 ): Promise<{ success: boolean; message: string; data: unknown }> => {
   let response = {
     success: true,
@@ -37,7 +42,14 @@ const overwriteDataStore = async (
     data: null,
   };
   let storeFilePath = `${userId}/${filename}.${storeName}.json`;
+  console.log('filepath', store);
   const file = `${getStorePath()}/${storeFilePath}`;
+
+  if (options.oldFilename) {
+    const oldStoreFilePath = `${userId}/${options.oldFilename}.${storeName}.json`;
+    const oldFile = `${getStorePath()}/${oldStoreFilePath}`;
+    fs.renameSync(oldFile, file);
+  }
 
   outputFile(file, JSON.stringify(store))
     .then(() => {
@@ -65,9 +77,6 @@ const readStore = (storeName: string, userId: string, filename: string) => {
       }
     );
   } catch (e) {
-    console.log("=!= Store Read Error =!=");
-    console.log(e);
-    console.log("=i= Store Read Error =i=");
     return;
   }
   if (!data) {
@@ -96,7 +105,6 @@ const getHandler = (event, { userId, filename }) => {
     return;
   }
   const content = readStore("editor", userId, filename);
-  console.log("Sending message on readStore() editor:client");
   event.sender.send("editor:getFile", {type: 'file:get', data: content});
 };
 
@@ -107,7 +115,11 @@ const getSubscriber = {
 
 const updateHandler = async (event, message) => {
   console.log("Editor::updateHandler", message);
-  const { userId, filename, contents } = message;
+  const { userId, filename, contents, oldFilename } = message;
+
+  const options = {
+    oldFilename
+  };
 
   if (!userId) {
     event.sender.send("error", {
@@ -125,13 +137,8 @@ const updateHandler = async (event, message) => {
     return;
   }
 
-  console.log("");
-  console.log("Writing File Data");
-  console.log("");
-
   const store = { name: filename, author: userId, data: contents };
-  await overwriteDataStore("editor", userId, filename, store);
-  console.log("Sending message on updateHandler() editor:client");
+  await overwriteDataStore("editor", userId, filename, store, options);
   event.sender.send("editor:updateFile", {type: 'file:update', data: message.content});
 };
 
@@ -150,14 +157,13 @@ const getFilesHandler = async (event, { userId }) => {
   const files = fs.readdirSync(filepath, {
     encoding: "utf8",
   });
-  console.log("files", files);
+
   const result = files.map((file) => ({
     name: file.split(".")?.[0],
     filename: file,
     fullpath: `${process.cwd()}/store/notes/${userId}/${file}`,
   }));
 
-  console.log('sending message on getFilesHandler() editor:client');
   event.sender.send("editor:getFiles", {type: 'files:get', data: result});
 };
 

@@ -46,7 +46,6 @@ export default function FileList({ onSelect }: Props) {
   ipcRenderer.addListener("editor:getFiles", filesGetHandler);
 
   const onFileClickHandler = (filename) => {
-    console.log("onFileClickHandler", filename);
     onSelect?.(filename);
   };
 

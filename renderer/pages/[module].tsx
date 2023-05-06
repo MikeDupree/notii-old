@@ -11,11 +11,9 @@ const Module = () => {
 
   useEffect(() => {
     const current = modules.find((mod) => mod.url === `/${module}`);
-    console.log("current", current);
     setCurrentModule(current);
     return () => { };
   }, [router.query, modules]);
-  console.log("useModules", modules);
 
   if (currentModule) {
     const Renderer = dynamic(
@@ -27,7 +25,7 @@ const Module = () => {
 
     return <Renderer modules={modules} />;
   }
-  return <p>Module: {module}</p>;
+  return <p>No module found for: {module}</p>;
 };
 
 export default Module;

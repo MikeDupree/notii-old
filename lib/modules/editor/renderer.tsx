@@ -11,11 +11,9 @@ type Props = {};
 const renderer = (props: Props) => {
   const session = useSession();
   const [selected, setSelected] = useState<string>();
-  console.log("selected", selected);
   const [contents, setContents] = useState<{ name: string; data: string }>();
   const socket = ipcHandler("editor");
 
-  console.log("contents", contents);
   const fileGetHandler = (event, message) => {
     console.debug("filesGetHandler", message);
     if (message.type === "file:get") {
@@ -41,11 +39,16 @@ const renderer = (props: Props) => {
     };
   }, [selected]);
 
-  const onChangeHandler = (contents: string) => {
+  const onChangeHandler = (
+    contents: string,
+    options: { newFilename: string; oldFilename: string }
+  ) => {
+    setSelected(options.newFilename);
     socket.send(
       {
         userId: session?.data?.user?.sub,
-        filename: "untitled",
+        filename: options.newFilename ?? "untitled",
+        oldFilename: options.oldFilename,
         contents,
       },
       { channelOverride: "editor:update" }
@@ -53,10 +56,11 @@ const renderer = (props: Props) => {
   };
 
   return (
-    <div>
+    <div id="EditorMain" className="full">
       {selected ? (
         <Editor
           onChange={onChangeHandler}
+          onBackButton={() => setSelected("")}
           filename={contents?.name}
           data={contents?.data}
         />

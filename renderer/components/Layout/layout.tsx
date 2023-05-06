@@ -168,6 +168,21 @@ export default function Layout(props: Props) {
           <div className="main">{children}</div>
         </Box>
       </Box>
+<<<<<<< HEAD
     </ThemeProvider>
+=======
+      <Box
+        component="main"
+        sx={{
+          display: 'flex',
+          flexDirection: 'column',
+          width: { sm: `calc(100% - ${drawerWidth}px)` },
+        }}
+      >
+        <Toolbar />
+        <div className="main full">{children}</div>
+      </Box>
+    </Box>
+>>>>>>> fe7a502 (Editor filename change)
   );
 }
