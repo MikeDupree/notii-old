@@ -7,6 +7,7 @@ import ListItemText from "@mui/material/ListItemText";
 import { ipcHandler } from "../../../../renderer/src/ipc";
 import { ipcRenderer } from "electron";
 import { useSession } from "next-auth/react";
+import { Typography } from "@mui/material";
 
 interface ListChildComponentProps {
   file: { name: string; filename: string; fullpath: string };
@@ -39,7 +40,14 @@ export default function FileList({ onSelect }: Props) {
   const socket = ipcHandler("editor");
 
   const filesGetHandler = (event, message) => {
+    console.log("filesGetHandler", message);
     if (message.type === "files:get") {
+      if (message.data.length === 0) {
+        console.log(
+          'Calling onSelect "untitled" from FileList since user has no existing documents'
+        );
+        onSelect?.("Untitled");
+      }
       setFiles(message.data);
     }
   };
@@ -70,6 +78,9 @@ export default function FileList({ onSelect }: Props) {
         bgcolor: "background.paper",
       }}
     >
+      <Typography variant="h1" className="title">
+        Notes
+      </Typography>
       {files.map((file) => (
         <RenderFileItem
           index={file.name}

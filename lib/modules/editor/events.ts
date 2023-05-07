@@ -6,23 +6,31 @@ import { outputFile } from "fs-extra";
 import { promisify } from "util";
 import { v4 as uuidv4 } from "uuid";
 import { json } from "stream/consumers";
+import { EditorFile } from "./classes/EditorFile";
 
 /*
  * Functions
  */
 function ensureDirectoryExistence(filePath) {
   let dirname = path.dirname(filePath);
+  console.log(`checking ${dirname} for existence`);
   if (fs.existsSync(dirname)) {
+    console.log('    look at that lassies, i found', dirname);
     return true;
   }
   ensureDirectoryExistence(dirname);
+  console.log('+   Creating ', dirname);
   fs.mkdirSync(dirname);
 }
 
 const getStorePath = () => {
   //TODO read OS type and determine path to store.
   // IE: Linux = ~/.config/notii/store
-  return "./store/notes/";
+  const notesDir = "./store/notes";
+
+  ensureDirectoryExistence(notesDir);
+
+  return notesDir;
 };
 
 interface WriteOptions {
@@ -41,10 +49,15 @@ const overwriteDataStore = async (
     message: "Store sucess",
     data: null,
   };
-  let storeFilePath = `${userId}/${filename}.${storeName}.json`;
-  console.log('filepath', store);
-  const file = `${getStorePath()}/${storeFilePath}`;
 
+  let storeFilePath = `${getStorePath()}/${userId}`;
+  console.log(`CHECKING ${storeFilePath}`);
+  ensureDirectoryExistence(storeFilePath);
+
+  const file = `${storeFilePath}/${filename}.${storeName}.json`;
+
+  
+  
   if (options.oldFilename) {
     const oldStoreFilePath = `${userId}/${options.oldFilename}.${storeName}.json`;
     const oldFile = `${getStorePath()}/${oldStoreFilePath}`;
@@ -68,19 +81,24 @@ const readStore = (storeName: string, userId: string, filename: string) => {
   if (!storeName || !userId || !filename) {
     return;
   }
+  const filepath = 
+    `${getStorePath()}/${userId}/${filename}.${storeName}.json`;
   try {
     data = fs.readFileSync(
-      `${getStorePath()}/${userId}/${filename}.${storeName}.json`,
+      filepath,
       {
         encoding: "utf8",
         flag: "r",
       }
     );
   } catch (e) {
-    return;
+    console.log(
+      `ERROR: Editor:events:readStore() cannot read. ${getStorePath()}/${userId}/${filename}.${storeName}.json does not exist.`
+    );
+    outputFile(filepath, JSON.stringify(fileData);
   }
   if (!data) {
-    return;
+    return "";
   }
   return JSON.parse(data);
 };
@@ -105,7 +123,7 @@ const getHandler = (event, { userId, filename }) => {
     return;
   }
   const content = readStore("editor", userId, filename);
-  event.sender.send("editor:getFile", {type: 'file:get', data: content});
+  event.sender.send("editor:getFile", { type: "file:get", data: content });
 };
 
 const getSubscriber = {
@@ -118,7 +136,7 @@ const updateHandler = async (event, message) => {
   const { userId, filename, contents, oldFilename } = message;
 
   const options = {
-    oldFilename
+    oldFilename,
   };
 
   if (!userId) {
@@ -138,8 +156,12 @@ const updateHandler = async (event, message) => {
   }
 
   const store = { name: filename, author: userId, data: contents };
+  const file = new EditorFile(filename, userId, contents);
   await overwriteDataStore("editor", userId, filename, store, options);
-  event.sender.send("editor:updateFile", {type: 'file:update', data: message.content});
+  event.sender.send("editor:updateFile", {
+    type: "file:update",
+    data: message.content,
+  });
 };
 
 const updateSubscriber = {
@@ -154,9 +176,17 @@ const getFilesHandler = async (event, { userId }) => {
   }
   const filepath = `${getStorePath()}/${userId}`;
 
-  const files = fs.readdirSync(filepath, {
-    encoding: "utf8",
-  });
+  ensureDirectoryExistence(filepath);
+  let files = [];
+  try {
+    files = fs.readdirSync(filepath, {
+      encoding: "utf8",
+    });
+  } catch (e) {
+    console.log("ERROR getFilesHandler readdirSync", e);
+  }
+
+  console.log("loaded files:", files);
 
   const result = files.map((file) => ({
     name: file.split(".")?.[0],
@@ -164,7 +194,7 @@ const getFilesHandler = async (event, { userId }) => {
     fullpath: `${process.cwd()}/store/notes/${userId}/${file}`,
   }));
 
-  event.sender.send("editor:getFiles", {type: 'files:get', data: result});
+  event.sender.send("editor:getFiles", { type: "files:get", data: result });
 };
 
 const getFilesSubscriber = {

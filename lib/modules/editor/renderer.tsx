@@ -15,13 +15,14 @@ const renderer = (props: Props) => {
   const socket = ipcHandler("editor");
 
   const fileGetHandler = (event, message) => {
-    console.debug("filesGetHandler", message);
     if (message.type === "file:get") {
       setContents(message.data);
     }
   };
   ipcRenderer.addListener("editor:getFile", fileGetHandler);
 
+  //
+  // Load existing note files..
   useEffect(() => {
     //request editor data for user.
     // emit this when first mounting to get current contents
@@ -39,6 +40,9 @@ const renderer = (props: Props) => {
     };
   }, [selected]);
 
+  /*
+   * Editor OnChange Handler 
+   */
   const onChangeHandler = (
     contents: string,
     options: { newFilename: string; oldFilename: string }
@@ -67,7 +71,6 @@ const renderer = (props: Props) => {
       ) : (
         <FileList
           onSelect={(filename: string) => {
-            console.log("setSelected", filename);
             setSelected(filename);
           }}
         />
