@@ -53,7 +53,7 @@ export default function Layout(props: Props) {
       <Divider />
 
       <List>
-        {["Mail", "Calendar"].map((text, index) => (
+        {["Settings", "Mail", "Calendar"].map((text, index) => (
           <ListItem key={text} disablePadding>
             <Link href={`/${text.toLowerCase()}`}>
               <ListItemButton>

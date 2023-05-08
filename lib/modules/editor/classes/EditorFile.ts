@@ -28,9 +28,6 @@ export class EditorFile {
   }
 
   setName(name: string): void {
-    const oldFile = `${STOREPATH}${this.author}/${this.name}.${STORENAME}.json`;
-    const newFile = `${STOREPATH}${this.author}/${name}.${STORENAME}.json`;
-    renameSync(oldFile, newFile);
     this.name = name;
   }
 

@@ -5,6 +5,8 @@ import { ipcHandler } from "../../../renderer/src/ipc";
 import { ipcRenderer } from "electron";
 import FileList from "./components/FileList";
 import { useSession } from "next-auth/react";
+import { IconButton, Typography } from "@mui/material";
+import { PlusOneOutlined } from "@mui/icons-material";
 
 type Props = {};
 
@@ -41,7 +43,7 @@ const renderer = (props: Props) => {
   }, [selected]);
 
   /*
-   * Editor OnChange Handler 
+   * Editor OnChange Handler
    */
   const onChangeHandler = (
     contents: string,
@@ -62,18 +64,30 @@ const renderer = (props: Props) => {
   return (
     <div id="EditorMain" className="full">
       {selected ? (
-        <Editor
-          onChange={onChangeHandler}
-          onBackButton={() => setSelected("")}
-          filename={contents?.name}
-          data={contents?.data}
-        />
+        <>
+          <Editor
+            onChange={onChangeHandler}
+            onBackButton={() => setSelected("")}
+            filename={contents?.name}
+            data={contents?.data}
+          />
+        </>
       ) : (
-        <FileList
-          onSelect={(filename: string) => {
-            setSelected(filename);
-          }}
-        />
+ <div>
+
+      <Typography variant="h1" className="title">
+        Notes
+      </Typography>
+      
+          <IconButton>
+            <PlusOneOutlined />
+          </IconButton>
+          <FileList
+            onSelect={(filename: string) => {
+              setSelected(filename);
+            }}
+          />
+        </div>
       )}
     </div>
   );

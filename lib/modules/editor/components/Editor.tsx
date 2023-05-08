@@ -38,11 +38,13 @@ const Editor = ({
 
     onChange?.(value, { newFilename: newFilename, oldFilename: filename });
   };
+
   const onChangeHandler = (e) => {
     console.log("e", e);
     setValue(e);
     onChange?.(e, { newFilename: name, oldFilename: filename });
   };
+
   return (
     <div className="Editor-Container full">
       <IconButton onClick={() => onBackButton?.()}>
@@ -72,6 +74,8 @@ const Editor = ({
           style={{}}
         />
       </div>
+
+      <div>status line</div>
     </div>
   );
 };

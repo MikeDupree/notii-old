@@ -95,7 +95,6 @@ const readStore = (storeName: string, userId: string, filename: string) => {
     console.log(
       `ERROR: Editor:events:readStore() cannot read. ${getStorePath()}/${userId}/${filename}.${storeName}.json does not exist.`
     );
-    outputFile(filepath, JSON.stringify(fileData);
   }
   if (!data) {
     return "";
@@ -156,7 +155,6 @@ const updateHandler = async (event, message) => {
   }
 
   const store = { name: filename, author: userId, data: contents };
-  const file = new EditorFile(filename, userId, contents);
   await overwriteDataStore("editor", userId, filename, store, options);
   event.sender.send("editor:updateFile", {
     type: "file:update",

@@ -78,9 +78,6 @@ export default function FileList({ onSelect }: Props) {
         bgcolor: "background.paper",
       }}
     >
-      <Typography variant="h1" className="title">
-        Notes
-      </Typography>
       {files.map((file) => (
         <RenderFileItem
           index={file.name}
