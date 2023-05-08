@@ -108,15 +108,22 @@ export const overwriteDataStore = async (
   let storeFilePath = `${userId}.${storeName}.json`;
 
   const writer = promisify(fs.writeFile);
-  await writer(
-    `${getStorePath()}/${storeFilePath}`,
-    JSON.stringify(store)
-  );
+  await writer(`${getStorePath()}/${storeFilePath}`, JSON.stringify(store));
 
   response.data = store;
   return response;
 };
-export const readStore = (storeName: string, userId: string) => {
+
+/**
+ * Read Store
+ *
+ * @param (string) storename
+ */
+export const readStore = (
+  storeName: string,
+  userId: string,
+  options?: { initData: Record<string, unknown> }
+) => {
   let data = null;
   if (!storeName || !userId) {
     return;
@@ -126,16 +133,14 @@ export const readStore = (storeName: string, userId: string) => {
       encoding: "utf8",
       flag: "r",
     });
+    return JSON.parse(data);
   } catch (e) {
-    console.log("=!= Store Read Error =!=");
-    console.log(e);
-    console.log("=i= Store Read Error =i=");
+    if (options && options.initData) {
+      console.log('readStore: options', options);
+      updateDataStore(storeName, userId, options.initData);
+    }
     return;
   }
-  if (!data) {
-    return;
-  }
-  return JSON.parse(data);
 };
 
 export default {
