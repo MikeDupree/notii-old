@@ -4,8 +4,11 @@ import { useSession } from "next-auth/react";
 import { ipcHandler } from "../../../renderer/src/ipc";
 import { ipcRenderer } from "electron";
 import { CircularProgress, Typography } from "@mui/material";
+import { Module, useModules } from "../../../renderer/hooks/modules";
 
-type Props = {};
+type Props = {
+  modules?: Module[];
+};
 type ConfigItem = {
   label: string;
   fieldName?: string;
@@ -26,17 +29,15 @@ const defaultSettings: ConfigItem[] = [
   },
 ];
 
-const renderer = (props: Props) => {
+const renderer = ({ modules }: Props) => {
+  console.log("Settings Renderer Props", modules);
   const [options, setOptions] = useState<Record<string, string | boolean>>();
   const settings = [...defaultSettings];
   const session = useSession();
   const socket = ipcHandler("settings");
 
   const handleSettingsUpdate = (event, message) => {
-    console.log(`SETTINGS socket message`);
-    console.log(message);
     if (message && message.data) {
-      console.log("set config", message.data);
       // TODO After store data array only fix.
       setOptions(message.data?.[0]); // This is cause the store is setup to store data in array... Cant remember why. Fix it.
     }
@@ -59,27 +60,18 @@ const renderer = (props: Props) => {
   // Add more config here...
 
   const handleChange = (change) => {
-    console.log(change);
-    // todo fix this. setup store for settings'
     setOptions({ ...options, ...change });
 
-    console.log("Updating settings config");
     socket.send(
       { userId: session?.data?.user?.sub, data: { ...options, ...change } },
       { channelOverride: "settings:add" }
     );
-
-    socket.send(
-      { value: "Handle dat change!" },
-      { channelOverride: "alerts:client" }
-    );
   };
 
-  useEffect(() => {
-    // Load settings.
-  }, []);
-
-  const getRadioItemValue = (fieldName: string): boolean => {
+  const getRadioItemValue = (fieldName: string, isModule: true): boolean => {
+    if (isModule) {
+      return !!options?.modulesEnabled?.[fieldName];
+    }
     return !!options?.[fieldName];
   };
 
@@ -100,6 +92,17 @@ const renderer = (props: Props) => {
           onChange={handleChange}
         />
       ))}
+
+      <Typography variant="h3">Modules</Typography>
+      {modules.length > 0 &&
+        modules.map((module) => (
+          <Radio
+            label={module.name}
+            fieldName={module.name.toLowerCase()}
+            value={getRadioItemValue(module.name.toLowerCase(), true)}
+            onChange={(modules) => handleChange({ modulesEnabled: modules })}
+          />
+        ))}
     </div>
   );
 };

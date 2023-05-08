@@ -25,7 +25,7 @@ const Module = () => {
       }
     );
 
-    return <Renderer />;
+    return <Renderer modules={modules} />;
   }
   return <p>Module: {module}</p>;
 };
