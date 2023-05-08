@@ -1,5 +1,5 @@
 import { log } from "console";
-import fs from "fs";
+import fs, { writeFileSync } from "fs";
 import { promisify } from "util";
 import { v4 as uuidv4 } from "uuid";
 
@@ -20,12 +20,12 @@ export interface DataStore {
   data: DataStoreEntry[];
 }
 
-export const updateDataStore = async (
+export const updateDataStore = (
   storeName: string,
   userId: string,
   data: Record<string, unknown>,
   config?: { force: boolean }
-): Promise<{ success: boolean; message: string; data: unknown }> => {
+): { success: boolean; message: string; data: unknown } => {
   let response = {
     success: true,
     message: "Store sucess",
@@ -63,7 +63,11 @@ export const updateDataStore = async (
       // There should only ever be one entry.
       // Grab it here.
       existingData = matchingData.pop();
-      for (const [i, entry] of store.data) {
+      // TODO I made this .entries() for settings bug (store.data was not iterable) is this breaks anything
+      // else then we need to rethink this.
+      // TODO this should prob be refactored. Store should be an interface and then we can have classes aka Handlers
+      // that store data in different ways. such as json, tables in a db, etc
+      for (const [i, entry] of store.data.entries()) {
         if (entry.id === data.id) {
           updated = true;
           if (config?.force) {
@@ -84,11 +88,11 @@ export const updateDataStore = async (
     store.data.push(data);
   }
 
-  const writer = promisify(fs.writeFile);
-  const result = await writer(
-    `${getStorePath()}/${storeFilePath}`,
-    JSON.stringify(store)
-  );
+  try {
+    writeFileSync(`${getStorePath()}/${storeFilePath}`, JSON.stringify(store));
+  } catch (e) {
+    console.log("Write Store Error", e);
+  }
 
   response.data = store;
   return response;
@@ -122,12 +126,26 @@ export const overwriteDataStore = async (
 export const readStore = (
   storeName: string,
   userId: string,
-  options?: { initData: Record<string, unknown> }
+  options?: {
+    initData?: Record<string, unknown>;
+    runCount?: number;
+  }
 ) => {
   let data = null;
-  if (!storeName || !userId) {
+  if (!storeName || !userId || (options && options.runCount > 3)) {
     return;
   }
+
+  if (!options) {
+    options = {
+      runCount: 1,
+    };
+  }
+
+  if (!options.runCount) {
+    options["runCount"] = 1;
+  }
+
   try {
     data = fs.readFileSync(`${getStorePath()}/${userId}.${storeName}.json`, {
       encoding: "utf8",
@@ -136,10 +154,14 @@ export const readStore = (
     return JSON.parse(data);
   } catch (e) {
     if (options && options.initData) {
-      console.log('readStore: options', options);
+      // Data doesnt exist.
+      // initialize with initData.
       updateDataStore(storeName, userId, options.initData);
+
+      // Increase run count and try again.
+      options.runCount++;
+      return readStore(storeName, userId, options);
     }
-    return;
   }
 };
 

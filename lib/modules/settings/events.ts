@@ -14,28 +14,31 @@ const updateStore = async (
     event.sender.send("settings:client", store);
     return;
   }
-  await updateDataStore("settings", userId, store, config);
+  updateDataStore("settings", userId, store, config);
   event.sender.send("settings:client", store?.data);
 };
 
 const getHandler = (event, message) => {
   if (!message.userId) {
-    event.sender.send("error", {
-      type: "storeGet",
-      message: "missing userId",
-      requestLogin: true,
-    });
+    console.log("Settings: event::get No UserId");
+    // event.sender.send("error", {
+    //   type: "storeGet",
+    //   message: "missing userId",
+    //   requestLogin: true,
+    // });
     return;
   }
-
-  console.log('Reading settings store, will create if nonexistent');
-  console.log('default settings', defaultSettings);
-  const todos = readStore("settings", message.userId, {
-    initData: defaultSettings,
-  });
-
-  console.log("Sending message on settings:client");
-  event.sender.send("settings:client", todos);
+  let settings = {};
+  try {
+    settings = readStore("settings", message.userId, {
+      initData: defaultSettings,
+      runCount: 1,
+    });
+  } catch (e) {
+    console.log("here lies the bug", e);
+  }
+  console.log("Sending message on settings:client", settings);
+  event.sender.send("settings:client", settings);
 };
 
 const getSubscriber = {
@@ -44,6 +47,7 @@ const getSubscriber = {
 };
 
 const updateHandler = async (event, message) => {
+  console.log("Settings::updateHandler");
   if (!message.userId) {
     event.sender.send("error", {
       type: "storeUpdate",
@@ -61,8 +65,9 @@ const updateHandler = async (event, message) => {
     });
     return;
   }
-  console.log('Sending message on settings:client');
-  const result = await updateDataStore("settings", message.userId, message.data);
+  console.log("updating settings config", message.data);
+  const result = updateDataStore("settings", message.userId, message.data);
+  console.log("Sending message on settings:client", result);
   event.sender.send("settings:client", result?.data);
 };
 
@@ -70,6 +75,5 @@ const createSubscriber = {
   channel: "settings:add",
   callback: updateHandler,
 };
-
 
 export const subscribers = [getSubscriber, createSubscriber];

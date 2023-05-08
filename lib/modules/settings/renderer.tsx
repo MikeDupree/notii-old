@@ -31,6 +31,7 @@ const renderer = (props: Props) => {
   const settings = [...defaultSettings];
   const session = useSession();
   const socket = ipcHandler("settings");
+
   const handleSettingsUpdate = (event, message) => {
     console.log(`SETTINGS socket message`);
     console.log(message);
@@ -40,7 +41,6 @@ const renderer = (props: Props) => {
       setOptions(message.data?.[0]); // This is cause the store is setup to store data in array... Cant remember why. Fix it.
     }
   };
-  console.log("regiserting handleSettingsUpdate", ipcRenderer);
   ipcRenderer.addListener("settings:client", handleSettingsUpdate);
 
   useEffect(() => {
@@ -65,7 +65,7 @@ const renderer = (props: Props) => {
 
     console.log("Updating settings config");
     socket.send(
-      { userId: session?.data?.user?.sub, data: options },
+      { userId: session?.data?.user?.sub, data: { ...options, ...change } },
       { channelOverride: "settings:add" }
     );
 
