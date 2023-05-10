@@ -49,9 +49,7 @@ export default function Layout(props: Props) {
 
   const drawer = (
     <div>
-      <Toolbar />
       <Divider />
-
       <List>
         {["Settings", "Mail", "Calendar"].map((text, index) => (
           <ListItem key={text} disablePadding>
@@ -97,9 +95,12 @@ export default function Layout(props: Props) {
         <CssBaseline />
         <AppBar
           position="fixed"
+          color="primary"
           sx={{
             width: { sm: `calc(100% - ${drawerWidth}px)` },
             ml: { sm: `${drawerWidth}px` },
+            boxShadow: 'none',
+            borderBottom: '1px solid rgba(0, 0, 0, 0.12);'
           }}
         >
           <Toolbar>
@@ -117,6 +118,7 @@ export default function Layout(props: Props) {
                 Notii
               </Typography>
             </Link>
+            <div style={{ flexGrow: 1 }} />
             <AccountMenu />
           </Toolbar>
         </AppBar>
@@ -168,21 +170,6 @@ export default function Layout(props: Props) {
           <div className="main">{children}</div>
         </Box>
       </Box>
-<<<<<<< HEAD
     </ThemeProvider>
-=======
-      <Box
-        component="main"
-        sx={{
-          display: 'flex',
-          flexDirection: 'column',
-          width: { sm: `calc(100% - ${drawerWidth}px)` },
-        }}
-      >
-        <Toolbar />
-        <div className="main full">{children}</div>
-      </Box>
-    </Box>
->>>>>>> fe7a502 (Editor filename change)
   );
 }

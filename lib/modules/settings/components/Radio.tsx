@@ -31,6 +31,7 @@ const Checkbox = ({
       <div style={{ padding: "20px" }}>
         <CheckboxMUI
           {...arialabel}
+          color="secondary"
           disabled={disabled}
           checked={value}
           onChange={() => {
