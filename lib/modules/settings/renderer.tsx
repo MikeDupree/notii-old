@@ -68,7 +68,7 @@ const renderer = ({ modules }: Props) => {
     );
   };
 
-  const getRadioItemValue = (fieldName: string, isModule: true): boolean => {
+  const getRadioItemValue = (fieldName: string, isModule?: boolean): boolean => {
     if (isModule) {
       return !!options?.modulesEnabled?.[fieldName];
     }
