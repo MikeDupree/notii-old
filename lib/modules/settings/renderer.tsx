@@ -29,9 +29,16 @@ const defaultSettings: ConfigItem[] = [
   },
 ];
 
+type Settings = {
+  darkMode: boolean;
+  devMode: boolean;
+  modules: Record<string, boolean>;
+  [key: string]: unknown;
+};
+
 const renderer = ({ modules }: Props) => {
   console.log("Settings Renderer Props", modules);
-  const [options, setOptions] = useState<Record<string, string | boolean>>();
+  const [options, setOptions] = useState<Settings>();
   const settings = [...defaultSettings];
   const session = useSession();
   const socket = ipcHandler("settings");
@@ -68,9 +75,22 @@ const renderer = ({ modules }: Props) => {
     );
   };
 
-  const getRadioItemValue = (fieldName: string, isModule?: boolean): boolean => {
+  const handleModuleChange = (module: Record<string, boolean>) => {
+    console.log("handleModuleChange", module);
+    options.modules = { ...options.modules, ...module };
+    setOptions({ ...options });
+    socket.send(
+      { userId: session?.data?.user?.sub, data: options },
+      { channelOverride: "settings:add" }
+    );
+  };
+
+  const getRadioItemValue = (
+    fieldName: string,
+    isModule?: boolean
+  ): boolean => {
     if (isModule) {
-      return !!options?.modulesEnabled?.[fieldName];
+      return !!options?.modules?.[fieldName];
     }
     return !!options?.[fieldName];
   };
@@ -99,8 +119,9 @@ const renderer = ({ modules }: Props) => {
           <Radio
             label={module.name}
             fieldName={module.name.toLowerCase()}
+            disabled={module.name.toLowerCase() === "settings"}
             value={getRadioItemValue(module.name.toLowerCase(), true)}
-            onChange={(modules) => handleChange({ modulesEnabled: modules })}
+            onChange={handleModuleChange}
           />
         ))}
     </div>

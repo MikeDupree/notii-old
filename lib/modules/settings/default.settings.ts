@@ -1,7 +1,9 @@
 const settings = {
   darkMode: false,
   devMode: false,
-  modulesEnabled: [],
+  modules: {
+    settings: true,
+  },
 };
 
 export default settings;

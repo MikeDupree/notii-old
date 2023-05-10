@@ -4,9 +4,9 @@ import { ipcRenderer } from "electron";
 import { useSession } from "next-auth/react";
 
 export interface Settings {
-  name: string;
-  url: string;
-  renderer: string;
+  darkMode: boolean;
+  devMode: boolean;
+  modules: Record<string, boolean>
 }
 
 const SettingsContext = createContext<Settings>(null);
@@ -45,7 +45,7 @@ export const useSettings = (): {
   };
 };
 
-export const ModulesProvider = ({ children }) => {
+export const SettingsProvider = ({ children }) => {
   return (
     <SettingsContext.Provider value={null}>{children}</SettingsContext.Provider>
   );
