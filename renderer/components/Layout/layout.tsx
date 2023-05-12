@@ -48,7 +48,8 @@ export default function Layout(props: Props) {
   };
 
   const drawer = (
-    <div>
+    <div className="main-sidebar">
+      <Toolbar />
       <Divider />
       <List>
         {["Settings", "Mail", "Calendar"].map((text, index) => (

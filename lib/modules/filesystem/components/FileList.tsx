@@ -83,19 +83,29 @@ interface File {
   is_symlink: boolean;
   children?: File[];
 }
-
-export default function FileList({ files }: { files: File[] }) {
+interface FileListProps {
+  files: File[];
+  onFileSelect?: (e) => void;
+}
+export default function FileList({ files, onFileSelect }: FileListProps) {
   const [showHidden, setShowHidden] = useState(false);
 
+  const onFileSelectHandler = (file: File) => {
+    console.log("onFileSelectHandler");
+    console.log("file", file);
+    
+    onFileSelect?.(file);
+  };
+
   return (
-    <div class="h-screen w-screen">
+    <div className="w-full">
       <TreeView
         aria-label="customized"
         defaultExpanded={["1"]}
         defaultCollapseIcon={<MinusSquare />}
         defaultExpandIcon={<PlusSquare />}
         defaultEndIcon={<CloseSquare />}
-        sx={{ height: 264, flexGrow: 1, maxWidth: 600, overflowY: "auto" }}
+        sx={{ height: 264, flexGrow: 1, width: "100%", overflowY: "auto" }}
       >
         {files.map((file) => {
           if (file.hidden && !showHidden) {
@@ -107,9 +117,12 @@ export default function FileList({ files }: { files: File[] }) {
               key={file.filepath}
               nodeId="1"
               label={file.filename}
+              onClick={(e) => onFileSelectHandler(e, file)}
             >
               {file?.children &&
-                file.children.map((child) => <StyledTreeItem />)}
+                file.children.map((child) => (
+                  <StyledTreeItem nodeId={child.id} />
+                ))}
             </StyledTreeItem>
           );
         })}

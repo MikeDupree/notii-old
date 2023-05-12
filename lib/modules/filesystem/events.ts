@@ -18,7 +18,7 @@ const getHandler = (event, message) => {
 };
 
 const getSubscriber = {
-  channel: "todo:get",
+  channel: "files:get",
   callback: getHandler,
 };
 
