@@ -55,7 +55,6 @@ const Editor = ({
         label="Filename"
         variant="standard"
         onChange={filenameOnChangeHandler}
-        defaultValue="untitled"
         value={name}
         sx={{
           marginTop: "7px",

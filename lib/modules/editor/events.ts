@@ -15,18 +15,18 @@ function ensureDirectoryExistence(filePath) {
   let dirname = path.dirname(filePath);
   console.log(`checking ${dirname} for existence`);
   if (fs.existsSync(dirname)) {
-    console.log('    look at that lassies, i found', dirname);
+    console.log("    look at that lassies, i found", dirname);
     return true;
   }
   ensureDirectoryExistence(dirname);
-  console.log('+   Creating ', dirname);
+  console.log("+   Creating ", dirname);
   fs.mkdirSync(dirname);
 }
 
 const getStorePath = () => {
   //TODO read OS type and determine path to store.
   // IE: Linux = ~/.config/notii/store
-  const notesDir = "./store/notes";
+  const notesDir = `./store/notes`;
 
   ensureDirectoryExistence(notesDir);
 
@@ -56,12 +56,17 @@ const overwriteDataStore = async (
 
   const file = `${storeFilePath}/${filename}.${storeName}.json`;
 
-  
-  
   if (options.oldFilename) {
     const oldStoreFilePath = `${userId}/${options.oldFilename}.${storeName}.json`;
+    console.log("old store path", oldStoreFilePath);
     const oldFile = `${getStorePath()}/${oldStoreFilePath}`;
-    fs.renameSync(oldFile, file);
+    if (oldFile !== file) {
+      try {
+        fs.renameSync(oldFile, file);
+      } catch (e) {
+        console.log(`Couldn't rename ${oldFile}, are you sure the file exists?`);
+      }
+    }
   }
 
   outputFile(file, JSON.stringify(store))
@@ -81,16 +86,13 @@ const readStore = (storeName: string, userId: string, filename: string) => {
   if (!storeName || !userId || !filename) {
     return;
   }
-  const filepath = 
-    `${getStorePath()}/${userId}/${filename}.${storeName}.json`;
+  const filepath = `${getStorePath()}/${userId}/${filename}.${storeName}.json`;
+  ensureDirectoryExistence(filepath);
   try {
-    data = fs.readFileSync(
-      filepath,
-      {
-        encoding: "utf8",
-        flag: "r",
-      }
-    );
+    data = fs.readFileSync(filepath, {
+      encoding: "utf8",
+      flag: "r",
+    });
   } catch (e) {
     console.log(
       `ERROR: Editor:events:readStore() cannot read. ${getStorePath()}/${userId}/${filename}.${storeName}.json does not exist.`
