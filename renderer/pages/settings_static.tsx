@@ -3,7 +3,11 @@ import Head from "next/head";
 import Link from "next/link";
 import Container from "@mui/material/Container";
 import Typography from "@mui/material/Typography";
+import { useState } from "react";
+import { useTheme } from "@mui/material/styles";
 import Box from "@mui/material/Box";
+import FormControlLabel from "@mui/material/FormControlLabel";
+import Switch from "@mui/material/Switch";
 import Menu from "../components/Menu";
 import { useSession } from "next-auth/react";
 
@@ -12,51 +16,106 @@ import { Button } from "@mui/material";
 
 export default function Home({ test }) {
   const { data } = useSession();
+  const mode = "light";
+
+  const [debugMode, setDebugMode] = useState(false);
+
+  function toggleDebugMode() {
+    setDebugMode((prevState) => !prevState);
+  }
+
+  function handleDarkModeChange() {
+  }
 
   return (
     <>
+   
       <Container maxWidth="lg">
-        <Box
-          sx={{
-            my: 4,
-            display: "flex",
-            flexDirection: "column",
-            justifyContent: "center",
-            alignItems: "center",
-          }}
-        >
-          <Typography variant="h4" component="h1" gutterBottom>
+        <Box sx={{ p: 6 }}>
+          <Typography variant="h4" sx={{ mb: 4 }}>
             Settings
           </Typography>
-        </Box>
-      </Container>
-
-      <Container maxWidth="lg">
-        <Box
-          sx={{
-            my: 4,
-            display: "flex",
-            flexDirection: "column",
-            justifyContent: "center",
-            alignItems: "center",
-          }}
-        >
-          <Typography variant="h4" component="h1" gutterBottom>
-            Material UI - Next.js example in TypeScript
-          </Typography>
-          <Link href="/about" color="secondary">
-            Go to the about page
-          </Link>
+          <Box
+            sx={{
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "space-between",
+            }}
+          >
+            <Typography variant="body1">Dark mode</Typography>
+            <Switch
+              checked={mode === "dark"}
+              onChange={handleDarkModeChange}
+              color="primary"
+            />
+          </Box>
+          <Box
+            sx={{
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "space-between",
+              mt: 4,
+            }}
+          >
+            <Typography variant="body1">Debug mode</Typography>
+            <Switch
+              checked={debugMode}
+              onChange={toggleDebugMode}
+              color="primary"
+            />
+          </Box>
         </Box>
       </Container>
     </>
   );
 }
 
-export async function getServerSideProps(context) {
-  return {
-    props: {
-      test: "This is a test",
-    },
-  };
+function Settings() {
+  const [debugMode, setDebugMode] = useState(false);
+  const { mode, toggleTheme } = useTheme();
+
+  function toggleDebugMode() {
+    setDebugMode((prevState) => !prevState);
+  }
+
+  function handleDarkModeChange() {
+    toggleTheme();
+  }
+
+  return (
+    <Box sx={{ p: 6 }}>
+      <Typography variant="h4" sx={{ mb: 4 }}>
+        Settings
+      </Typography>
+      <Box
+        sx={{
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "space-between",
+        }}
+      >
+        <Typography variant="body1">Dark mode</Typography>
+        <Switch
+          checked={mode === "dark"}
+          onChange={handleDarkModeChange}
+          color="primary"
+        />
+      </Box>
+      <Box
+        sx={{
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "space-between",
+          mt: 4,
+        }}
+      >
+        <Typography variant="body1">Debug mode</Typography>
+        <Switch
+          checked={debugMode}
+          onChange={toggleDebugMode}
+          color="primary"
+        />
+      </Box>
+    </Box>
+  );
 }

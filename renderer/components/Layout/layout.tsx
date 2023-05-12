@@ -49,10 +49,9 @@ export default function Layout(props: Props) {
 
   const drawer = (
     <div>
-      <Toolbar />
       <Divider />
       <List>
-        {["Mail", "Calendar"].map((text, index) => (
+        {["Settings", "Mail", "Calendar"].map((text, index) => (
           <ListItem key={text} disablePadding>
             <Link href={`/${text.toLowerCase()}`}>
               <ListItemButton>
@@ -67,21 +66,22 @@ export default function Layout(props: Props) {
       </List>
       <Divider />
       <List>
-        {!!settings && modules.map((module, index) => {
-          if (!settings.modules?.[module.name.toLowerCase()]) return null;
-          return (
-            <ListItem key={module.name} disablePadding>
-              <Link href={module.url}>
-                <ListItemButton>
-                  <ListItemIcon>
-                    {index % 2 === 0 ? <InboxIcon /> : <MailIcon />}
-                  </ListItemIcon>
-                  <ListItemText primary={module.name} />
-                </ListItemButton>
-              </Link>
-            </ListItem>
-          );
-        })}
+        {!!settings &&
+          modules.map((module, index) => {
+            if (!settings.modules?.[module.name.toLowerCase()]) return null;
+            return (
+              <ListItem key={module.name} disablePadding>
+                <Link href={module.url}>
+                  <ListItemButton>
+                    <ListItemIcon>
+                      {index % 2 === 0 ? <InboxIcon /> : <MailIcon />}
+                    </ListItemIcon>
+                    <ListItemText primary={module.name} />
+                  </ListItemButton>
+                </Link>
+              </ListItem>
+            );
+          })}
       </List>
     </div>
   );
@@ -95,9 +95,12 @@ export default function Layout(props: Props) {
         <CssBaseline />
         <AppBar
           position="fixed"
+          color="primary"
           sx={{
             width: { sm: `calc(100% - ${drawerWidth}px)` },
             ml: { sm: `${drawerWidth}px` },
+            boxShadow: 'none',
+            borderBottom: '1px solid rgba(0, 0, 0, 0.12);'
           }}
         >
           <Toolbar>
@@ -115,6 +118,7 @@ export default function Layout(props: Props) {
                 Notii
               </Typography>
             </Link>
+            <div style={{ flexGrow: 1 }} />
             <AccountMenu />
           </Toolbar>
         </AppBar>

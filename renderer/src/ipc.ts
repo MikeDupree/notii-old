@@ -7,7 +7,12 @@ export const ipcHandler = (channel: string) => {
       sendChannel = config.channelOverride;
     }
     console.log('sending on channel:', sendChannel);
-    ipcRenderer.send(sendChannel, message);
+    try{
+      ipcRenderer.send(sendChannel, message);
+    } catch(e){
+      console.log('Error sending ipc message for', sendChannel);
+      console.log('error::', e);
+    }
   }
 
   const register = (callback: (event, arg) => void) => { 

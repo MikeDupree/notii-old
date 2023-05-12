@@ -1,4 +1,5 @@
 import { useRouter } from "next/router";
+import Loading from '../components/Loading';
 import { useEffect, useState } from "react";
 import { useModules, Module as ModuleInterface } from "../hooks/modules";
 import dynamic from "next/dynamic";
@@ -11,23 +12,21 @@ const Module = () => {
 
   useEffect(() => {
     const current = modules.find((mod) => mod.url === `/${module}`);
-    console.log("current", current);
     setCurrentModule(current);
     return () => { };
   }, [router.query, modules]);
-  console.log("useModules", modules);
 
   if (currentModule) {
     const Renderer = dynamic(
       () => import(`@lib/modules/${currentModule.renderer}/renderer`),
       {
-        loading: () => <p>Loading...</p>,
+        loading: () => <Loading />,
       }
     );
 
     return <Renderer modules={modules} />;
   }
-  return <p>Module: {module}</p>;
+  return <p>No module found for: {module}</p>;
 };
 
 export default Module;

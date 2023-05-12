@@ -46,7 +46,7 @@ const Account = (props: Props) => {
                   sx={{ width: 128, height: 128 }}
                 />
                 <Typography variant="body1">{data?.user?.name}</Typography>
-                <Typography variant="body1">{datai?.user?.email}</Typography>
+                <Typography variant="body1">{data?.user?.email}</Typography>
               </Box>
             </Paper>
           </Grid>

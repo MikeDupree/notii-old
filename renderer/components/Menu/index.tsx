@@ -12,9 +12,10 @@ import Tooltip from "@mui/material/Tooltip";
 import PersonAdd from "@mui/icons-material/PersonAdd";
 import Settings from "@mui/icons-material/Settings";
 import Logout from "@mui/icons-material/Logout";
+import LoginIcon from "@mui/icons-material/Login";
 // Next-auth
 import { useSession } from "next-auth/react";
-import { signOut } from "next-auth/react";
+import { signOut, signIn } from "next-auth/react";
 import { useRouter } from "next/router";
 
 // TODO find the proper type, or create a type for session.
@@ -30,8 +31,6 @@ const getRoute = (id: string, user: any) => {
 export const AccountMenu = () => {
   const session = useSession();
   const router = useRouter();
-  console.log("session", session);
-  console.log("router", router);
 
   const handleClick = (event: MouseEvent<HTMLElement>) => {
     setAnchorEl(event.currentTarget);
@@ -51,7 +50,11 @@ export const AccountMenu = () => {
   const open = Boolean(anchorEl);
 
   if (!session.data) {
-    return null;
+    return (
+      <IconButton onClick={() => signIn()}>
+        <LoginIcon />
+      </IconButton>
+    );
   }
   return (
     <>
