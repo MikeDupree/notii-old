@@ -11,6 +11,7 @@ import createEmotionServer from "@emotion/server/create-instance";
 import { AppType } from "next/app";
 import { createEmotionCache } from "../theme";
 import { MyAppProps } from "./_app";
+import { useSettings } from "../hooks/settings";
 
 interface MyDocumentProps extends DocumentProps {
   emotionStyleTags: JSX.Element[];
@@ -24,7 +25,9 @@ export default function MyDocument({ emotionStyleTags }: MyDocumentProps) {
         <meta name="emotion-insertion-point" content="" />
         {emotionStyleTags}
       </Head>
-      <body className="">
+      <body
+        className=""
+      >
         <Main />
         <NextScript />
       </body>

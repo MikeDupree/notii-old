@@ -38,6 +38,7 @@ export default function Layout(props: Props) {
   const { window, children } = props;
   const { modules } = useModules();
   const { settings } = useSettings();
+  const { darkMode } = settings ?? { darkMode: "light" };
   console.log("settings", settings);
   const theme = getTheme();
   console.log("theme config", theme);
@@ -46,6 +47,16 @@ export default function Layout(props: Props) {
   const handleDrawerToggle = () => {
     setMobileOpen(!mobileOpen);
   };
+
+  useEffect(() => {
+    console.log("darkmode changed", darkMode);
+    const className = document.body.classList;
+    if (darkMode) {
+      className.add("dark");
+      return;
+    }
+    className.remove("dark");
+  }, [darkMode]);
 
   const drawer = (
     <div className="main-sidebar">
@@ -100,8 +111,8 @@ export default function Layout(props: Props) {
           sx={{
             width: { sm: `calc(100% - ${drawerWidth}px)` },
             ml: { sm: `${drawerWidth}px` },
-            boxShadow: 'none',
-            borderBottom: '1px solid rgba(0, 0, 0, 0.12);'
+            boxShadow: "none",
+            borderBottom: "1px solid rgba(0, 0, 0, 0.12);",
           }}
         >
           <Toolbar>

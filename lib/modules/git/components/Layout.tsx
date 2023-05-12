@@ -12,13 +12,13 @@ const Layout = ({ title, leftCol, children }: LayoutProps) => {
         <Toolbar title={title} />
       </div>
       {leftCol && (
-        <div className="col-span-12 rounded-lg border border-gray-500 sm:col-span-4">
+        <div className="rounded-lg border border-gray-500 col-span-4">
           {leftCol}
         </div>
       )}
       <div
-        className={`col-span-12 rounded-lg border border-gray-400 ${
-          leftCol ? "p-32 sm:col-span-8" : ""
+        className={`rounded-lg border border-gray-400 ${
+          leftCol ? "col-span-8" : "col-span-12"
         }`}
       >
         {children}

@@ -9,6 +9,8 @@ import { ipcHandler } from "../../../renderer/src/ipc";
 import { ipcRenderer } from "electron";
 import Layout from "./components/Layout";
 import axios from "axios";
+import { Divider, Typography } from "@mui/material";
+import LogViewer from "./components/LogViewer";
 
 type Props = {};
 
@@ -22,9 +24,6 @@ const renderer = (props: Props) => {
   const [files, setFiles] = useState([]);
   const [logs, setLogs] = useState([]);
   const [error, setError] = useState("");
-  console.log("selectedRepo:", selectedRepo);
-  console.log("file:", file);
-  console.log("files:", files);
   const socket = ipcHandler("git");
 
   /*
@@ -63,7 +62,6 @@ const renderer = (props: Props) => {
         .catch((e) => {
           console.log(e);
         });
-      console.log("send git:log");
       socket.send(
         {
           path: selectedRepo,
@@ -89,26 +87,13 @@ const renderer = (props: Props) => {
     };
   }, []);
 
-  if (!selectedRepo) {
-    return (
-      <Layout title="No Repo Selected">
-        <SelectGitRepo />
-      </Layout>
-    );
-  }
-
   return (
-    <>
-      <Layout title={selectedRepo} leftCol={<FileList files={files} />}>
+    <Layout title={selectedRepo} leftCol={<FileList files={files} />}>
+      <>
         <Diff file={file} />
-      </Layout>
-      <ul>
-      {logs.map((log) => {
-        console.log(log);
-        return <li> {log.commit.message} </li>;
-      })}
-      </ul>
-    </>
+        <LogViewer logs={logs} />
+      </>
+    </Layout>
   );
 };
 export default renderer;

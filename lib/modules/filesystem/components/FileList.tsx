@@ -8,6 +8,8 @@ import TreeItem, { TreeItemProps, treeItemClasses } from "@mui/lab/TreeItem";
 import Collapse from "@mui/material/Collapse";
 import { useSpring, animated } from "@react-spring/web";
 import { TransitionProps } from "@mui/material/transitions";
+import { Typography, Box } from "@mui/material";
+import { FileIcon, defaultStyles } from "react-file-icon";
 
 function MinusSquare(props: SvgIconProps) {
   return (
@@ -90,10 +92,11 @@ interface FileListProps {
 export default function FileList({ files, onFileSelect }: FileListProps) {
   const [showHidden, setShowHidden] = useState(false);
 
+  console.log("files", files);
   const onFileSelectHandler = (file: File) => {
     console.log("onFileSelectHandler");
     console.log("file", file);
-    
+
     onFileSelect?.(file);
   };
 
@@ -104,7 +107,6 @@ export default function FileList({ files, onFileSelect }: FileListProps) {
         defaultExpanded={["1"]}
         defaultCollapseIcon={<MinusSquare />}
         defaultExpandIcon={<PlusSquare />}
-        defaultEndIcon={<CloseSquare />}
         sx={{ height: 264, flexGrow: 1, width: "100%", overflowY: "auto" }}
       >
         {files.map((file) => {
@@ -113,17 +115,32 @@ export default function FileList({ files, onFileSelect }: FileListProps) {
           }
 
           return (
-            <StyledTreeItem
-              key={file.filepath}
-              nodeId="1"
-              label={file.filename}
-              onClick={(e) => onFileSelectHandler(e, file)}
-            >
-              {file?.children &&
-                file.children.map((child) => (
-                  <StyledTreeItem nodeId={child.id} />
-                ))}
-            </StyledTreeItem>
+            <div className="flex flex-row">
+              <div className="flex-1">
+                <div style={{ width: "20px", height: "20px" }}>
+                  {file.filename.split(".")?.[1] ? (
+                    <FileIcon
+                      extension={file.filename.split(".")?.[1]}
+                      {...defaultStyles?.[file.filename.split(".")?.[1]]}
+                    />
+                  ) : (
+                    <></>
+                  )}
+                </div>
+              </div>
+              <StyledTreeItem
+                key={file.filepath}
+                className="flex-8"
+                nodeId="1"
+                label={file.filename}
+                onClick={() => onFileSelectHandler(file)}
+              >
+                {file?.children &&
+                  file.children.map((child) => (
+                    <StyledTreeItem nodeId={child.id} />
+                  ))}
+              </StyledTreeItem>
+            </div>
           );
         })}
       </TreeView>
