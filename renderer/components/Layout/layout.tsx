@@ -37,6 +37,7 @@ interface Props {
 export default function Layout(props: Props) {
   const { window, children } = props;
   const { modules } = useModules();
+  console.log("modules", modules);
   const { settings } = useSettings();
   console.log("settings", settings);
   const theme = getTheme();
@@ -99,8 +100,8 @@ export default function Layout(props: Props) {
           sx={{
             width: { sm: `calc(100% - ${drawerWidth}px)` },
             ml: { sm: `${drawerWidth}px` },
-            boxShadow: 'none',
-            borderBottom: '1px solid rgba(0, 0, 0, 0.12);'
+            boxShadow: "none",
+            borderBottom: "1px solid rgba(0, 0, 0, 0.12);",
           }}
         >
           <Toolbar>
