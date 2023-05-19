@@ -12,10 +12,11 @@ import { useSession } from "next-auth/react";
 import { ipcHandler } from "../../../renderer/src/ipc";
 import { ipcRenderer } from "electron";
 import FileUpload from "./components/FileUpload";
+import ItemList from "./components/ItemList";
 
 export default function Todo({ test }) {
    console.log('TODO', ipcRenderer);
-  const [todos, setTodos] = useState([]);
+  const [items, setItems] = useState([]);
   const session = useSession();
   const socket = ipcHandler("finance");
   const handleFinanceUpdate = (event, message) => {
@@ -40,7 +41,7 @@ export default function Todo({ test }) {
 
   console.log(session);
   // Listen for messages from the server
-
+  console.log('items', items);
 
   return (
     <div>
@@ -60,9 +61,13 @@ export default function Todo({ test }) {
         </Box>
 
         <Box>
-          <FileUpload />
+          <FileUpload setItems={setItems} />
+        </Box>
+        <Box>
+          <ItemList items={items} />
         </Box>
       </Container>
+
     </div>
   );
 }

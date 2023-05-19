@@ -1,9 +1,13 @@
 import React, { useState } from "react";
-
-const FileUpload = () => {
+interface Props {
+  setItems: (items) => void;
+}
+const FileUpload = ({ setItems }: Props) => {
   const [selectedFile, setSelectedFile] = useState(null);
   const [errorMessage, setErrorMessage] = useState("");
-  const [fileContent, setFileContent] = useState("");
+  const [fileContent, setFileContent] = useState([]);
+
+  console.log("fileContent", fileContent);
 
   const readFileContent = (file) => {
     const reader = new FileReader();
@@ -23,15 +27,18 @@ const FileUpload = () => {
         });
 
         for (const [i, item] of contentArr.entries()) {
-          console.log("item", item);
           for (const [i2, item2] of contentArr.entries()) {
-            if (i !== i2 && item.label === item2.label) {
-              console.log("Duplicate entry", item);
+            if (
+              i !== i2 &&
+              item.label === item2.label &&
+              item.date !== item2.date
+            ) {
+              // console.log("Duplicate entry", { item, item2 });
             }
           }
         }
-
-        setFileContent(event.target.result as string);
+        setItems(contentArr);
+        setFileContent(contentArr);
       });
     };
     reader.readAsText(file);
