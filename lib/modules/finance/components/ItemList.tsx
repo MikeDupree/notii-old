@@ -18,7 +18,7 @@ interface Props {
 //     "payment": "44.88",
 //     "deposit": ""
 // }
-export default function FolderList({ items }: Props) {
+export default function ItemList({ items }: Props) {
   return (
     <List sx={{ width: "100%", maxWidth: 360, bgcolor: "background.paper" }}>
       {items?.map((item) => {
