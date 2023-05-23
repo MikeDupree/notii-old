@@ -15,15 +15,21 @@ import FileUpload from "./components/FileUpload";
 import ItemList from "./components/ItemList";
 
 export default function Todo({ test }) {
-   console.log('TODO', ipcRenderer);
   const [items, setItems] = useState([]);
+  const [selectedLabel, setSelectedLabel] = useState('');
+  const [fileUploadEnabled, setFileUploadEnabled] = useState(true);
   const session = useSession();
+
+  const onLabelSelect = (label: string) => {
+    setSelectedLabel(label);
+  };
+
   const socket = ipcHandler("finance");
   const handleFinanceUpdate = (event, message) => {
     console.log(`TODO socket message`);
     console.log(message);
   };
-  console.log('regiserting handleFinanceUpdate', ipcRenderer);
+  console.log("regiserting handleFinanceUpdate", ipcRenderer);
   ipcRenderer.addListener("todo:client", handleFinanceUpdate);
 
   useEffect(() => {
@@ -41,8 +47,8 @@ export default function Todo({ test }) {
 
   console.log(session);
   // Listen for messages from the server
-  console.log('items', items);
-
+  console.log("items", items);
+  console.log("fileUploadEnabled", fileUploadEnabled);
   return (
     <div>
       <Container maxWidth="lg">
@@ -60,14 +66,22 @@ export default function Todo({ test }) {
           </Typography>
         </Box>
 
-        <Box>
-          <FileUpload setItems={setItems} />
-        </Box>
-        <Box>
-          <ItemList items={items} />
-        </Box>
+        {fileUploadEnabled ? (
+          <Box>
+            <FileUpload
+              setItems={setItems}
+              onComplete={(status) => {
+                console.log("setting file upload", !status);
+                setFileUploadEnabled(!status);
+              }}
+            />
+          </Box>
+        ) : (
+          <Box>
+            <ItemList items={items} onSelect={(selected) => {console.log(selected)}}/>
+          </Box>
+        )}
       </Container>
-
     </div>
   );
 }

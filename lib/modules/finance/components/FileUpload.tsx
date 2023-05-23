@@ -1,8 +1,9 @@
 import React, { useState } from "react";
 interface Props {
-  setItems: (items) => void;
+ setItems: (items) => void;
+ onComplete?: (status: boolean) => void;
 }
-const FileUpload = ({ setItems }: Props) => {
+const FileUpload = ({ setItems, onComplete }: Props) => {
   const [selectedFile, setSelectedFile] = useState(null);
   const [errorMessage, setErrorMessage] = useState("");
   const [fileContent, setFileContent] = useState([]);
@@ -63,6 +64,7 @@ const FileUpload = ({ setItems }: Props) => {
       setSelectedFile(file);
       readFileContent(file);
       setErrorMessage("");
+      onComplete?.(true);
     } else {
       setErrorMessage("Please drop a valid CSV file.");
     }
