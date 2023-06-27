@@ -9,6 +9,7 @@ import { Module, useModules } from "../../../renderer/hooks/modules";
 type Props = {
   modules?: Module[];
 };
+
 type ConfigItem = {
   label: string;
   fieldName?: string;
@@ -96,7 +97,12 @@ const renderer = ({ modules }: Props) => {
   };
 
   if (!options) {
-    return <CircularProgress />;
+    return (
+      <>
+        <Typography variant="h3">Loading options...</Typography>
+        <CircularProgress />
+      </>
+    );
   }
 
   return (

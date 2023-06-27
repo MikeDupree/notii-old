@@ -9,17 +9,24 @@ export interface Settings {
   modules: Record<string, boolean>
 }
 
-const SettingsContext = createContext<Settings>(null);
+const defaultSettings = {
+  darkMode: false,
+  devMode: false,
+  modules: {
+    settings: true,
+  }
+}
+const SettingsContext = createContext<Settings>(defaultSettings);
 
 export const useSettings = (): {
   settings: Settings;
 } => {
   const session = useSession();
-  const [settings, setSettings] = useState<Settings>();
+  const [settings, setSettings] = useState<Settings>(defaultSettings);
 
   const socket = ipcHandler("settings");
   const handleGetSettings = (event, message) => {
-    setSettings(message.data?.[0]);
+    if (message?.data) setSettings(message.data?.[0]);
   };
 
   if (ipcRenderer) {
